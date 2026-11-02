@@ -14,6 +14,16 @@ esc = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 LANG = "it"
 T = lambda it, en: en if LANG == "en" else it
 
+COLAB = "https://colab.research.google.com/github/JoeBosi/public-projects-near-home/blob/master/notebooks/"
+IMG_GUIDA = {  # file: (larghezza, altezza)
+    "api-json.jpg": (1000, 420), "nb-primi-passi-it.jpg": (1000, 490), "nb-primi-passi-en.jpg": (1000, 490),
+    "nb-mini-it.jpg": (1000, 700), "nb-mini-en.jpg": (1000, 700), "minisito-390-it.jpg": (390, 760), "minisito-390-en.jpg": (390, 760)}
+def fig(nome, prefisso, alt, didascalia):
+    """Immagine della guida con didascalia «Cosa dovresti vedere»."""
+    w, h = IMG_GUIDA[nome]
+    return (f'<figure class="fig"><img src="{prefisso}img/guida/{nome}" width="{w}" height="{h}" loading="lazy" alt="{esc(alt)}">'
+            f'<figcaption><strong>{T("Cosa dovresti vedere", "What you should see")}.</strong> {didascalia}</figcaption></figure>')
+
 def eur(x):
     if LANG == "en":
         return "€" + f"{round(x):,}"
@@ -157,6 +167,7 @@ pre{background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:12p
 .filtri{display:flex;flex-wrap:wrap;gap:10px;margin:.8rem 0}.filtri input,.filtri select{font:inherit;padding:8px;border:1px solid var(--l);border-radius:8px;max-width:100%}
 
 .sch-o,.sch-v{overflow:visible}.sch-o{display:block;width:100%;height:auto;margin:.6rem 0}.sch-v{display:none;width:100%;max-width:440px;height:auto;margin:.6rem auto}@media(max-width:899px){.sch-o{display:none}.sch-v{display:block}}.build{border:2px solid var(--ac);border-radius:12px;background:#fff;padding:14px 16px;margin:1.2rem 0}.build h2{margin:0 0 .4rem;font-size:1.25rem}.build p{margin:.3rem 0 .6rem}
+.fig{margin:1rem 0}.fig img{max-width:100%;height:auto;border:1px solid var(--l);border-radius:8px;display:block}.fig figcaption{font-size:.9rem;color:var(--mu);margin-top:.3rem}
 .puoi{margin:.4rem 0 .8rem;padding-left:1.2rem}.puoi li{margin:.2rem 0}
 .hero{background:var(--sf);border:1px solid var(--l);border-radius:14px;padding:18px 18px 14px;margin:1rem 0 1.4rem}
 .hero h1{margin-top:0}.cerca{display:flex;flex-wrap:wrap;gap:8px;margin:.8rem 0}.cerca input{flex:1 1 240px;font:inherit;padding:12px;border:2px solid var(--ac);border-radius:10px}
@@ -700,6 +711,7 @@ def guida():
 <p>I dati arrivano in formato <strong>JSON</strong>: testo con coppie «nome: valore» tra parentesi graffe. Apri l'indirizzo seguente (chiede i progetti del Comune di Arezzo, due soltanto):</p>
 <pre><code>{u2}</code></pre>
 <p><a class="btn" href="{u2}">Apri nel browser</a></p>
+{fig("api-json.jpg", "../", "Il testo JSON restituito dalla API di OpenCoesione, aperto in un browser", "Il browser mostra un lungo testo JSON che comincia con <code>count</code> e, più in basso, i due progetti richiesti. Screenshot reale del 2 novembre 2026, con Chromium; Firefox mostra lo stesso contenuto con una vista ad albero.")}
 <p>Il numero <code>count</code> è il totale dei progetti trovati: <strong>{es_due['count']}</strong>. Il primo risultato, ridotto ai campi principali, è questo:</p>
 <pre><code>{esc(tronca(esempio_corto))}</code></pre>
 <p>Si legge così: <code>oc_finanz_tot_pub_netto</code> è il <em>finanziato</em>, <code>tot_pagamenti</code> è il <em>pagato</em>, <code>oc_stato_progetto</code> è lo stato. Gli importi hanno la virgola come separatore decimale e sono scritti come testo.</p>
@@ -717,6 +729,7 @@ def guida():
 <h2 id="csv">8. Il CSV nel foglio di calcolo</h2>
 <p>Un <strong>CSV</strong> è una tabella in un file di testo, con le colonne separate da virgole. Si apre con Excel, LibreOffice o Fogli Google. La API di OpenCoesione risponde solo in JSON, quindi abbiamo convertito noi i progetti di questo sito in un CSV: <a href="../dati/progetti-arezzo.csv" download>scarica progetti-arezzo.csv</a> ({pl(n_perim, 'riga', 'righe')}). Per i file interi, già in CSV, c'è la pagina <a href="https://opencoesione.gov.it/it/opendata/">dati scaricabili di OpenCoesione</a>.</p>
 <ol><li>Scarica il file.</li><li>In LibreOffice: «File → Apri», scegli il file, nella finestra di importazione lascia «Unicode (UTF-8)» e separatore «Virgola». In Excel: «Dati → Da testo/CSV». In Fogli Google: «File → Importa → Carica».</li><li>Per filtrare: seleziona la riga delle intestazioni e attiva il filtro automatico (menu «Dati»). Scegli per esempio <code>stato</code> uguale a «In corso».</li><li>Per sommare: seleziona la colonna <code>finanziato_euro</code> e leggi la somma in basso. Fai la stessa cosa con <code>pagato_euro</code>: sono due totali diversi.</li></ol>
+<p><strong>Cosa dovresti vedere.</strong> Una tabella con 16 colonne (da <code>cod_locale_progetto</code> a <code>link_api</code>), una riga di intestazioni e {pl(n_perim, 'riga', 'righe')} di dati. Il passo di LibreOffice è stato provato aprendo il file in modalità automatica: le righe e le colonne arrivano corrette, con gli importi come numeri. I passi di Excel e di Fogli Google dipendono dai loro menu e non sono stati provati qui.</p>
 <h2 id="soldi">9. Importo finanziato e pagamenti</h2>
 <p>Il <strong>finanziato</strong> è la somma assegnata al progetto; il <strong>pagato</strong> è quanto è stato effettivamente versato. Nel progetto «{esc(frase(es_det['oc_titolo_progetto']))}» (CUP {esc(es_det['cup'])}) il finanziato è {eur(num(es_det['oc_finanz_tot_pub_netto']))} e il pagato è {eur(num(es_det['tot_pagamenti']))}. In altri progetti le due cifre differiscono: per questo sul sito non vengono mai sommate né confuse.</p>
 <h2>Cercare un CUP</h2>
@@ -727,19 +740,22 @@ def guida():
 <pre><code>{esc(tronca(det_corto))}</code></pre>
 <p>Le date sono scritte come anno, mese, giorno senza separatori: <code>20220629</code> significa 29/06/2022.</p>
 <h2 id="python">11. Primi passi con Python (facoltativo)</h2>
-<p>Se vuoi automatizzare, ecco un programma di poche righe che usa solo la libreria standard di Python (si installa da <a href="https://www.python.org/">python.org</a>). Salvalo come <code>progetti.py</code> ed eseguilo con <code>python progetti.py</code>:</p>
+<p>Se vuoi automatizzare, ecco un programma di poche righe che usa solo la libreria standard di Python (si installa da <a href="https://www.python.org/">python.org</a>). Salvalo come <code>progetti.py</code> ed eseguilo con <code>python progetti.py</code>. Preferisci non installare nulla? <a class="btn pri" href="{COLAB}primi-passi-python.ipynb" style="text-decoration:none">Apri in Google Colab</a> (gratuito, serve un account Google; premi Play su ogni cella).</p>
 <pre><code>import json, urllib.request
 
 url = "{u2}"
-with urllib.request.urlopen(url) as risposta:
+richiesta = urllib.request.Request(url, headers={{"User-Agent": "progetti-didattico/1.0 (https://opendata.giuseppebosi.com)"}})
+with urllib.request.urlopen(richiesta) as risposta:
     dati = json.load(risposta)
 
 print("Progetti trovati:", dati["count"])
 for p in dati["results"]:
     print(p["cup"], p["oc_stato_progetto"], p["oc_finanz_tot_pub_netto"], p["tot_pagamenti"])</code></pre>
-<p>Risultato ottenuto eseguendolo:</p>
+<p>La riga con <code>Request</code> presenta il programma con il suo <strong>User-Agent</strong>, cioè un nome descrittivo che dice al servizio chi sta chiedendo. È una buona prassi: alcuni servizi, o alcune reti, rifiutano con l'errore 403 le richieste anonime. Nelle nostre prove OpenCoesione ha risposto 200 anche senza, ma con il nome il programma funziona in più situazioni.</p>
+<p><strong>Cosa dovresti vedere</strong> (risultato ottenuto eseguendolo da un ambiente Python nuovo):</p>
 <pre><code>Progetti trovati: {es_due['count']}
 {chr(10).join(f"{p['cup']} {p['oc_stato_progetto']} {p['oc_finanz_tot_pub_netto']} {p['tot_pagamenti']}" for p in es_due['results'])}</code></pre>
+{fig("nb-primi-passi-it.jpg", "../", "Il notebook Python «Primi passi» eseguito, con il risultato sotto la seconda cella", "Il notebook dopo l'esecuzione. Screenshot di un'esecuzione in locale, in un ambiente Python nuovo: su Colab l'aspetto cambia, il risultato è lo stesso.")}
 <p class="small mu">Quando scarichi molte pagine, aspetta almeno un secondo tra una richiesta e l'altra e salva le risposte sul tuo computer per non ripeterle.</p>"""
     pagina("guida/index.html", "Guida agli open data", c, "guida", profondita=1)
 
@@ -822,6 +838,7 @@ def guida_en():
 <p>Data arrive in <strong>JSON</strong> format: text with «name: value» pairs between curly brackets. Open the address below (it asks for the projects of the Municipality of Arezzo, only two of them):</p>
 <pre><code>{u2}</code></pre>
 <p><a class="btn" href="{u2}">Open in the browser</a></p>
+{fig("api-json.jpg", "../../", "The JSON text returned by the OpenCoesione API, opened in a browser", "The browser shows a long JSON text that starts with <code>count</code> and, further down, the two projects requested. Real screenshot taken on 2 November 2026 with Chromium; Firefox shows the same content in a tree view.")}
 <p>The number <code>count</code> is the total of projects found: <strong>{es_due['count']}</strong>. The first result, reduced to the main fields, is:</p>
 <pre><code>{esc(tronca(esempio_corto))}</code></pre>
 <p>Read it like this: <code>oc_finanz_tot_pub_netto</code> is the <em>funded</em> amount, <code>tot_pagamenti</code> is the <em>paid</em> amount, <code>oc_stato_progetto</code> is the status. Amounts use a comma as decimal separator and are written as text.</p>
@@ -839,6 +856,7 @@ def guida_en():
 <h2 id="csv">8. CSV in a spreadsheet</h2>
 <p>A <strong>CSV</strong> is a table in a text file, with columns separated by commas. It opens with Excel, LibreOffice or Google Sheets. The OpenCoesione API answers only in JSON, so we converted this site's projects to CSV ourselves: <a href="../../dati/progetti-arezzo.csv" download>download progetti-arezzo.csv</a> ({n_perim} rows; column names and values are in Italian). For the whole files, already in CSV, see the <a href="https://opencoesione.gov.it/it/opendata/">OpenCoesione downloads page</a>.</p>
 <ol><li>Download the file.</li><li>In LibreOffice: «File → Open», choose the file, in the import window keep «Unicode (UTF-8)» and separator «Comma». In Excel: «Data → From Text/CSV». In Google Sheets: «File → Import → Upload».</li><li>To filter: select the header row and turn on the autofilter (the «Data» menu). Choose for example <code>stato</code> equal to «In corso».</li><li>To sum: select the <code>finanziato_euro</code> column and read the sum at the bottom. Do the same with <code>pagato_euro</code>: they are two different totals.</li></ol>
+<p><strong>What you should see.</strong> A table with 16 columns (from <code>cod_locale_progetto</code> to <code>link_api</code>), one header row and {pl(n_perim, 'row', 'rows')} of data. The LibreOffice step was tested by opening the file in automatic mode: rows and columns arrive correctly, with amounts as numbers. The Excel and Google Sheets steps depend on their menus and were not tested here.</p>
 <h2 id="soldi">9. Funded amount and payments</h2>
 <p>The <strong>funded</strong> amount is the sum assigned to the project; the <strong>paid</strong> amount is what was actually paid out. In the project «<span lang="it">{esc(frase(es_det['oc_titolo_progetto']))}</span>» (CUP {esc(es_det['cup'])}) the funded amount is {eur(num(es_det['oc_finanz_tot_pub_netto']))} and the paid amount is {eur(num(es_det['tot_pagamenti']))}. In other projects the two figures differ: that is why the site never adds them together or mixes them up.</p>
 <h2>Looking up a CUP</h2>
@@ -849,19 +867,22 @@ def guida_en():
 <pre><code>{esc(tronca(det_corto))}</code></pre>
 <p>Dates are written as year, month, day without separators: <code>20220629</code> means 2022-06-29.</p>
 <h2 id="python">11. First steps with Python (optional)</h2>
-<p>If you want to automate, here is a program of a few lines that uses only Python's standard library (install it from <a href="https://www.python.org/">python.org</a>). Save it as <code>projects.py</code> and run it with <code>python projects.py</code>:</p>
+<p>If you want to automate, here is a program of a few lines that uses only Python's standard library (install it from <a href="https://www.python.org/">python.org</a>). Save it as <code>projects.py</code> and run it with <code>python projects.py</code>. Prefer to install nothing? <a class="btn pri" href="{COLAB}first-steps-python.ipynb" style="text-decoration:none">Open in Google Colab</a> (free, a Google account is needed; press play on each cell).</p>
 <pre><code>import json, urllib.request
 
 url = "{u2}"
-with urllib.request.urlopen(url) as response:
+request = urllib.request.Request(url, headers={{"User-Agent": "projects-tutorial/1.0 (https://opendata.giuseppebosi.com)"}})
+with urllib.request.urlopen(request) as response:
     data = json.load(response)
 
 print("Projects found:", data["count"])
 for p in data["results"]:
     print(p["cup"], p["oc_stato_progetto"], p["oc_finanz_tot_pub_netto"], p["tot_pagamenti"])</code></pre>
-<p>Result obtained by running it:</p>
+<p>The line with <code>Request</code> introduces the program with its <strong>User-Agent</strong>, a descriptive name that tells the service who is asking. It is good practice: some services, or some networks, refuse anonymous requests with a 403 error. In our tests OpenCoesione answered 200 even without it, but with the name the program works in more situations.</p>
+<p><strong>What you should see</strong> (result obtained by running it in a fresh Python environment):</p>
 <pre><code>Projects found: {es_due['count']}
 {chr(10).join(f"{p['cup']} {p['oc_stato_progetto']} {p['oc_finanz_tot_pub_netto']} {p['tot_pagamenti']}" for p in es_due['results'])}</code></pre>
+{fig("nb-primi-passi-en.jpg", "../../", "The Python notebook «First steps» after running, with the result under the second cell", "The notebook after running. Screenshot of a local run in a fresh Python environment: on Colab the look differs, the result is the same.")}
 <p class="small mu">When you download many pages, wait at least a second between requests and save the answers on your computer so as not to repeat them.</p>"""
     pagina("guida/index.html", "Tutorial: open data", c, "guida", profondita=1)
 
@@ -886,17 +907,20 @@ def costruisci():
 <pre><code>mkdir mini-site
 cd mini-site</code></pre>
 <h2>Step 2. Save the program</h2>
+<p><a class="btn pri" href="{COLAB}mini-site.ipynb" style="text-decoration:none">Try it now in Google Colab</a> Free, nothing to install (a Google account is needed): press play on each cell. If you prefer to work on your own computer, continue below.</p>
 <p>Create a file called <code>build.py</code> in that folder and paste the code below, or <a href="{nome}" download>download it</a> and rename it. Read it first: the comments explain each part.</p>
 <pre><code>{esc(src)}</code></pre>
 <h2>Step 3. Run it</h2>
 <pre><code>python3 build.py</code></pre>
-<p>The program downloads 26 pages of 500 projects, waiting a second between requests, and it keeps every page in the <code>cache</code> folder: if it stops, run it again and it resumes. It takes about three minutes. This is what we obtained:</p>
+<p>The program downloads 26 pages of 500 projects, waiting a second between requests, and it keeps every page in the <code>cache</code> folder: if it stops, run it again and it resumes. It takes about three minutes. The program introduces itself to the service with a descriptive <strong>User-Agent</strong> (<code>mini-site-tutorial/1.0</code>): it is good practice, because some services refuse anonymous requests with a 403 error. <strong>What you should see</strong> (outcome obtained from a fresh folder and a fresh Python environment):</p>
 <pre><code>{esc(esito.splitlines()[0])}
 {esc(esito.splitlines()[1])}
 {esc(esito.splitlines()[2])}</code></pre>
 <h2>Step 4. Look at the result</h2>
 <pre><code>python3 -m http.server 8000 --directory site</code></pre>
 <p>Open <code>http://localhost:8000</code> in the browser. To stop the server press Ctrl+C. The two big figures are the same ones you can read on the <a href="../../">home page</a> for all 12,590 projects of Arezzo (the home page counts a narrower perimeter, explained in <a href="../../metodo/">Method and sources</a>).</p>
+{fig("minisito-390-en.jpg", "../../../", "The page generated by the program, opened on a 390 pixel wide screen", "The generated page, opened at a width of 390 pixels (phone): the two big totals and the start of the table.")}
+{fig("nb-mini-en.jpg", "../../../", "The mini website notebook after running, with the generated page shown under the last cell", "The same program in the notebook: the generated page appears at the bottom. Screenshot of a local run (with the 26 pages already stored), not on Colab.")}
 <h2>How it works, in four parts</h2>
 <ol><li><strong>Download with a pause and a memory</strong>: <code>download()</code> asks one page at a time, waits a second, waits longer and retries if the service answers 429 («too many requests»), and saves each answer in <code>cache</code>.</li><li><strong>Pagination</strong>: the loop continues until <code>last_page</code>, as explained in the <a href="../#pagine">tutorial</a>.</li><li><strong>Sums</strong>: amounts are text with a comma, so <code>euro()</code> turns <code>"51817680,65"</code> into a number. Funded and paid are summed separately.</li><li><strong>The page</strong>: a text template with the figures and a table; <code>html.escape</code> protects the page from special characters in titles.</li></ol>
 <h2>Next steps</h2>
@@ -917,17 +941,20 @@ cd mini-site</code></pre>
 <pre><code>mkdir mini-sito
 cd mini-sito</code></pre>
 <h2>Passo 2. Salva il programma</h2>
+<p><a class="btn pri" href="{COLAB}mini-sito.ipynb" style="text-decoration:none">Prova subito in Google Colab</a> Gratuito, senza installare nulla (serve un account Google): premi Play su ogni cella. Se preferisci lavorare sul tuo computer, continua qui sotto.</p>
 <p>Crea in quella cartella un file chiamato <code>costruisci.py</code> e incolla il codice qui sotto, oppure <a href="{nome}" download>scaricalo</a> e rinominalo. Leggilo prima: i commenti spiegano ogni parte.</p>
 <pre><code>{esc(src)}</code></pre>
 <h2>Passo 3. Eseguilo</h2>
 <pre><code>python3 costruisci.py</code></pre>
-<p>Il programma scarica 26 pagine da 500 progetti, aspettando un secondo tra una richiesta e l'altra, e conserva ogni pagina nella cartella <code>cache</code>: se si ferma, rilancialo e riparte da dove era arrivato. Richiede circa tre minuti. Ecco cosa abbiamo ottenuto:</p>
+<p>Il programma scarica 26 pagine da 500 progetti, aspettando un secondo tra una richiesta e l'altra, e conserva ogni pagina nella cartella <code>cache</code>: se si ferma, rilancialo e riparte da dove era arrivato. Richiede circa tre minuti. Il programma si presenta al servizio con uno <strong>User-Agent</strong> descrittivo (<code>mini-sito-didattico/1.0</code>): è una buona prassi, perché alcuni servizi rifiutano con l'errore 403 le richieste anonime. <strong>Cosa dovresti vedere</strong> (esito ottenuto da una cartella e un ambiente Python nuovi):</p>
 <pre><code>{esc(esito.splitlines()[0])}
 {esc(esito.splitlines()[1])}
 {esc(esito.splitlines()[2])}</code></pre>
 <h2>Passo 4. Guarda il risultato</h2>
 <pre><code>python3 -m http.server 8000 --directory sito</code></pre>
 <p>Apri <code>http://localhost:8000</code> nel browser. Per fermare il server premi Ctrl+C. Le due cifre grandi sono quelle della <a href="../../">prima pagina</a> riferite a tutti i 12.590 progetti di Arezzo (la prima pagina conta un perimetro più ristretto, spiegato nel <a href="../../metodo/">Metodo e fonti</a>).</p>
+{fig("minisito-390-it.jpg", "../../", "La pagina generata dal programma, aperta su uno schermo largo 390 pixel", "La pagina generata, aperta con una larghezza di 390 pixel (telefono): i due totali in grande e l'inizio della tabella.")}
+{fig("nb-mini-it.jpg", "../../", "Il notebook del mini sito eseguito, con la pagina generata mostrata sotto l'ultima cella", "Lo stesso programma nel notebook: in fondo compare la pagina generata. Screenshot di un'esecuzione in locale (con le 26 pagine già in memoria), non su Colab.")}
 <h2>Come funziona, in quattro parti</h2>
 <ol><li><strong>Scarico con pausa e memoria</strong>: <code>scarica()</code> chiede una pagina per volta, aspetta un secondo, aspetta di più e riprova se il servizio risponde 429 («troppe richieste»), e salva ogni risposta in <code>cache</code>.</li><li><strong>Paginazione</strong>: il ciclo continua fino a <code>last_page</code>, come spiegato nel <a href="../#pagine">tutorial</a>.</li><li><strong>Somme</strong>: gli importi sono testo con la virgola, quindi <code>euro()</code> trasforma <code>"51817680,65"</code> in un numero. Finanziato e pagato sono sommati separatamente.</li><li><strong>La pagina</strong>: un modello di testo con le cifre e una tabella; <code>html.escape</code> protegge la pagina dai caratteri speciali nei titoli.</li></ol>
 <h2>E poi</h2>
@@ -980,6 +1007,9 @@ if __name__ == "__main__":
     os.makedirs(SITE)
     open(os.path.join(SITE, "stile.css"), "w").write(CSS)
     shutil.copy(os.path.join(ROOT, "assets", "og-opendata-arezzo.jpg"), os.path.join(SITE, "og-opendata-arezzo.jpg"))
+    os.makedirs(os.path.join(SITE, "img", "guida"))
+    for f in IMG_GUIDA:
+        shutil.copy(os.path.join(ROOT, "assets", "guida", f), os.path.join(SITE, "img", "guida", f))
     for LANG in ("it", "en"):
         home(); elenco(); dati_completi()
         (metodo_en if LANG == "en" else metodo)()
