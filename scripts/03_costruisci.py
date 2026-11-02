@@ -180,7 +180,57 @@ FLAG_UK = ('<svg width="22" height="15" viewBox="0 0 60 40" aria-hidden="true"><
 FOOT_IT = '<p>I dati provengono da <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licenza <a href="https://creativecommons.org/licenses/by/4.0/deed.it">CC BY 4.0</a>) e sono quelli comunicati dagli enti: per lo stato attuale di un\'opera consulta la scheda ufficiale e le fonti. Per segnalare una correzione scrivi a <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Dati aggiornati al ' + "{DATA_DATI}" + '.</p>'
 FOOT_EN = '<p>The data come from <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licence <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>) and are those reported by public bodies: for the current state of a work, see the official page and the sources. Official project texts appear in Italian, as published in the source. To suggest a correction write to <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Data updated to ' + "{DATA_ISO}" + '.</p>'
 
-def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
+GH = "https://github.com/JoeBosi/public-projects-near-home"
+LI = "https://www.linkedin.com/in/giuseppebosi"
+WWW = "https://www.giuseppebosi.com"
+PERSONA = {"@type": "Person", "name": "Giuseppe Bosi", "url": WWW, "sameAs": [WWW, LI, GH]}
+SEO = {
+    ("it", "index.html"): ("Open data Arezzo: progetti pubblici e fondi di coesione", "Scopri cosa si costruisce con i soldi pubblici ad Arezzo: progetti, importi e stato dei lavori dai dati ufficiali OpenCoesione, spiegati in parole semplici."),
+    ("it", "opere/index.html"): ("Opere e progetti pubblici ad Arezzo: elenco e importi", "Elenco dei lavori pubblici e dei progetti finanziati ad Arezzo con i fondi di coesione: ente responsabile, importo finanziato, già pagato e stato dichiarato."),
+    ("it", "dati/index.html"): ("Dati aperti Arezzo: tabella e CSV dei progetti pubblici", "Tabella filtrabile e file CSV e JSON con i progetti pubblici di Arezzo da OpenCoesione, licenza CC BY 4.0, pronti per il tuo foglio di calcolo."),
+    ("it", "guida/index.html"): ("Tutorial open data: leggere i dati pubblici con una API", "Impara da zero cosa sono gli open data, come funziona una API, il formato JSON e il CSV, con esempi eseguiti sui dati reali di OpenCoesione."),
+    ("it", "guida/costruisci/index.html"): ("Costruisci un sito di open data in Python, passo passo", "Crea in un quarto d'ora un piccolo sito con i progetti pubblici di un Comune, con Python e la API di OpenCoesione: codice completo ed esito della prova."),
+    ("it", "metodo/index.html"): ("Metodo e fonti: come sono calcolati i dati di Arezzo", "Fonte OpenCoesione, licenza CC BY 4.0, perimetro dei progetti contati, significato dei campi, arrotondamenti e controlli automatici del sito."),
+    ("en", "index.html"): ("Open data Arezzo: public projects and cohesion funds", "Find out what public money is building in Arezzo: projects, amounts and status from official OpenCoesione data, explained in plain language."),
+    ("en", "opere/index.html"): ("Public works and projects in Arezzo: list and amounts", "List of the public works and projects funded in Arezzo with cohesion funds: responsible body, funded amount, amount already paid and declared status."),
+    ("en", "dati/index.html"): ("Open data Arezzo: table and CSV of public projects", "Filterable table plus CSV and JSON files with the public projects of Arezzo from OpenCoesione, CC BY 4.0 licence, ready for your spreadsheet."),
+    ("en", "guida/index.html"): ("Open data tutorial: read public data with an API", "Learn from scratch what open data are, how an API works, the JSON and CSV formats, with examples run on the real OpenCoesione data."),
+    ("en", "guida/costruisci/index.html"): ("Build an open data website in Python, step by step", "Build in about fifteen minutes a small website with a municipality's public projects, using Python and the OpenCoesione API: full code and test outcome."),
+    ("en", "metodo/index.html"): ("Method and sources: how the Arezzo data are computed", "OpenCoesione source, CC BY 4.0 licence, perimeter of the counted projects, meaning of the fields, rounding and the site's automatic checks."),
+}
+def taglia(t, n):
+    t = " ".join(str(t).split())
+    return t if len(t) <= n else t[:n - 1].rsplit(" ", 1)[0].rstrip(",;:.") + "…"
+
+def jsonld(percorso, titolo, descr, url, lang):
+    en = lang == "en"
+    base = {"@context": "https://schema.org", "inLanguage": lang, "name": titolo, "description": descr, "url": url, "author": PERSONA}
+    site = {"@type": "WebSite", "name": "Public projects near home" if en else "Progetti pubblici sotto casa", "url": SITO + ("/en/" if en else "/")}
+    if percorso == "index.html":
+        d = dict(base, **{"@type": "WebSite", "name": site["name"], "publisher": PERSONA,
+                          "potentialAction": {"@type": "SearchAction", "target": SITO + ("/en/" if en else "/") + "dati/?q={search_term_string}", "query-input": "required name=search_term_string"}})
+    elif percorso == "dati/index.html":
+        pre = SITO + ("/en/" if en else "/")
+        d = dict(base, **{"@type": "Dataset", "license": "https://creativecommons.org/licenses/by/4.0/", "isAccessibleForFree": True,
+                          "creator": {"@type": "Organization", "name": "OpenCoesione", "url": "https://opencoesione.gov.it/"}, "publisher": PERSONA,
+                          "isBasedOn": "https://opencoesione.gov.it/it/api/", "dateModified": DATA_ISO, "spatialCoverage": {"@type": "Place", "name": "Arezzo, Italia"},
+                          "keywords": ["open data", "Arezzo", "OpenCoesione", "fondi di coesione"],
+                          "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": SITO + "/dati/progetti-arezzo.csv"},
+                                           {"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": SITO + "/dati/progetti-arezzo.json"}]})
+    elif percorso == "guida/index.html":
+        d = dict(base, **{"@type": "Course", "provider": PERSONA, "isAccessibleForFree": True, "educationalLevel": "Beginner", "about": ["open data", "API", "JSON", "CSV"]})
+    elif percorso == "guida/costruisci/index.html":
+        d = dict(base, **{"@type": "SoftwareSourceCode", "codeRepository": GH, "programmingLanguage": "Python", "runtimePlatform": "Python 3",
+                          "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": True})
+    elif percorso == "opere/index.html":
+        d = dict(base, **{"@type": "CollectionPage", "isPartOf": site})
+    elif percorso == "metodo/index.html":
+        d = dict(base, **{"@type": "TechArticle", "isPartOf": site, "dateModified": DATA_ISO})
+    else:
+        d = dict(base, **{"@type": "WebPage", "isPartOf": site, "dateModified": DATA_ISO})
+    return '<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False).replace("</", "<\\/") + "</script>"
+
+def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0, seo_titolo=None):
     en = LANG == "en"
     rel = "../" * (profondita + (1 if en else 0))   # radice del sito (CSS)
     lrel = "../" * profondita                         # radice della lingua corrente (link di navigazione)
@@ -189,13 +239,19 @@ def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
     flag = (f'<a class="lingua" href="{altra}" hreflang="it" lang="it" title="Italiano">{FLAG_IT}<span>IT</span></a>' if en
             else f'<a class="lingua" href="{altra}" hreflang="en" lang="en" title="English">{FLAG_UK}<span>EN</span></a>')
     img = f"{SITO}/og-opendata-arezzo.jpg"
-    ogt = esc(titolo) + " | " + T("Progetti pubblici sotto casa", "Public projects near home")
-    ogd = esc(descr or T('I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.', 'Projects funded with public cohesion funds in the Municipality of Arezzo, explained simply, with the official OpenCoesione data.'))
+    brand = T("Progetti pubblici sotto casa", "Public projects near home")
+    sk = SEO.get((LANG, percorso))
+    ttl = seo_titolo or (sk[0] if sk else titolo)
+    desc = descr or (sk[1] if sk else T('I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.', 'Projects funded with public cohesion funds in the Municipality of Arezzo, explained simply, with the official OpenCoesione data.'))
+    title_tag = ttl if len(ttl) + len(brand) + 3 > 72 else ttl + " | " + brand
+    url = f"{SITO}/{'en/' if en else ''}{dir_p}"
+    ogt, ogd = esc(title_tag), esc(desc)
     ogalt = T("Computer portatile con una dashboard dei progetti di Arezzo, una mappa della città e un modellino di ponte su un tavolo di legno", "Laptop showing a dashboard of Arezzo projects, a city map and a small bridge model on a wooden table")
-    og = (f'<meta property="og:type" content="website"><meta property="og:site_name" content="{T("Progetti pubblici sotto casa", "Public projects near home")}"><meta property="og:title" content="{ogt}"><meta property="og:description" content="{ogd}">'
-          f'<meta property="og:url" content="{SITO}/{"en/" if en else ""}{dir_p}"><meta property="og:image" content="{img}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{ogalt}"><meta property="og:locale" content="{"en_GB" if en else "it_IT"}">'
+    og = (f'<meta property="og:type" content="website"><meta property="og:site_name" content="{brand}"><meta property="og:title" content="{ogt}"><meta property="og:description" content="{ogd}">'
+          f'<meta property="og:url" content="{url}"><meta property="og:image" content="{img}"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{ogalt}"><meta property="og:locale" content="{"en_GB" if en else "it_IT"}"><meta property="og:locale:alternate" content="{"it_IT" if en else "en_GB"}">'
           f'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{ogt}"><meta name="twitter:description" content="{ogd}"><meta name="twitter:image" content="{img}"><meta name="twitter:image:alt" content="{ogalt}">')
-    alt_it = f'<link rel="alternate" hreflang="it" href="{SITO}/{dir_p}"><link rel="alternate" hreflang="en" href="{SITO}/en/{dir_p}">'
+    alt_it = (f'<link rel="canonical" href="{url}"><link rel="alternate" hreflang="it" href="{SITO}/{dir_p}"><link rel="alternate" hreflang="en" href="{SITO}/en/{dir_p}"><link rel="alternate" hreflang="x-default" href="{SITO}/{dir_p}">')
+    ld = jsonld(percorso, title_tag, desc, url, LANG)
     nav = ([("", "Start here", "home"), ("opere/", "Projects", "opere"), ("dati/", "Full data", "dati"),
             ("metodo/", "Method and sources", "metodo"), ("guida/", "Tutorial", "guida")] if en else
            [("", "Per cominciare", "home"), ("opere/", "Opere e progetti", "opere"), ("dati/", "Dati completi", "dati"),
@@ -203,15 +259,19 @@ def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
     n = "".join(f'<a href="{lrel}{h}" class="{"on " if k == attiva else ""}{"tut" if k == "guida" else ""}"{" aria-current=page" if k == attiva else ""}>{t}</a>' for h, t, k in nav)
     doc = f"""<!doctype html>
 <html lang="{LANG}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{esc(titolo)} | {T("Progetti pubblici sotto casa", "Public projects near home")}</title>{alt_it}{og}
+<title>{esc(title_tag)}</title>
+<meta name="description" content="{esc(desc)}">
+<meta name="author" content="Giuseppe Bosi">
+{alt_it}
 {og}
-<meta name="description" content="{esc(descr or T('I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.', 'Projects funded with public cohesion funds in the Municipality of Arezzo, explained simply, with the official OpenCoesione data.'))}">
+{ld}
 <link rel="stylesheet" href="{rel}stile.css"></head><body>
 <header class="top"><div class="fonte"><div class="w fl"><span>{T("Fonte", "Source")}: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · <span class="lg">{T("ultimo aggiornamento dei dati", "latest data update")}</span><span class="sh">{T("dati al", "data as of")}</span>: <strong>{DATA_ISO if en else DATA_DATI}</strong></span>{flag.replace('class="lingua"', 'class="lingua lm"')}</div><div class="w conc">{T("Progetto indipendente, a titolo didattico, con dati ufficiali.", "Independent project, for educational purposes, using official data.")}</div></div><div class="w nav"><b><a href="{lrel or './'}" style="text-decoration:none;color:inherit">{T("Progetti pubblici sotto casa", "Public projects near home")}</a></b><nav aria-label="Principale">{n}</nav>{flag.replace('class="lingua"', 'class="lingua ld"')}</div></header>
 <script>(function(){{var h=document.querySelector("header.top");function f(){{document.documentElement.style.scrollPaddingTop=(h.offsetHeight+8)+"px"}}function g(){{h.classList.toggle("sc",scrollY>40);f()}}f();addEventListener("resize",f);addEventListener("scroll",g,{{passive:true}})}})()</script>
 <main class="w">{corpo}</main>
 <footer><div class="w">{FOOT_EN.replace('{DATA_ISO}', DATA_ISO) if en else FOOT_IT.replace('{DATA_DATI}', DATA_DATI)}
-<p>{T("A cura del Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche", "By Prof. Giuseppe Bosi, Computer Science and Technology")} — <a href="https://www.giuseppebosi.com">www.giuseppebosi.com</a></p></div></footer>
+<p>{T("A cura del Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche", "By Prof. Giuseppe Bosi, Computer Science and Technology")} — <a href="https://www.giuseppebosi.com">www.giuseppebosi.com</a></p>
+<p class="small">{T("Collegamenti", "Links")}: <a href="{WWW}" rel="me">{T("Sito di Giuseppe Bosi", "Giuseppe Bosi's website")}</a> · <a href="{GH}" rel="me">GitHub</a> · <a href="{LI}" rel="me">LinkedIn</a></p></div></footer>
 </body></html>"""
     p = os.path.join(SITE, ("en/" if en else "") + percorso)
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -451,6 +511,8 @@ q.oninput=f;f()})();""".replace("@1", T("progetto trovato", "project found")).re
     pagina("opere/index.html", T("Opere e progetti", "Projects"), c, "opere", profondita=1)
 
 # ------------------------------------------------------------------ scheda
+TITOLI_USATI = set()
+
 def scheda(d):
     en = LANG == "en"
     rip = [(T("Unione europea", "European Union"), d["oc_finanz_ue_netto"]), (T("Stato", "Italian State"), num(d["oc_finanz_stato_fsc_netto"]) + num(d["oc_finanz_stato_fondo_rot_netto"]) + num(d["oc_finanz_stato_altri_prov_netto"]) + num(d["oc_finanz_stato_compl_netto"]) + num(d["oc_finanz_stato_pac_netto"])),
@@ -495,7 +557,19 @@ def scheda(d):
 <h2>{T("Fonte", "Source")}</h2>
 <p><a class="btn" href="{esc(d['oc_link'])}">{T("Scheda ufficiale su OpenCoesione", "Official page on OpenCoesione")}</a> <a class="btn" href="{esc(apiurl(d))}">{T("Vedi da dove vengono questi dati (JSON)", "See where this data comes from (JSON)")}</a></p>
 <p class="small mu">{T("Il link «dati» è la risposta esatta della API usata per questa pagina. Per capire come leggerla: <a href='../guida/'>Guida agli open data</a>.", "The «data» link is the exact API response used for this page. To learn how to read it: <a href='../guida/'>Tutorial</a>.")}</p>"""
-    pagina(f"progetti/{slug(d)}.html", titolo_vis(d), c, "opere", profondita=1)
+    chiave = (LANG, taglia(titolo_vis(d), 56))
+    sfx = T(" | Progetto ad Arezzo", " | Arezzo project")
+    t_seo = chiave[1] + sfx
+    if t_seo in TITOLI_USATI:
+        t_seo = chiave[1] + " (" + (d["cup"] or d["cod_locale_progetto"]) + ")" + sfx
+    if t_seo in TITOLI_USATI:
+        t_seo = chiave[1] + " (" + d["cod_locale_progetto"] + ")" + sfx
+    TITOLI_USATI.add(t_seo)
+    if en:
+        de = f'{taglia(ente_str(d), 38)}: {eur(fin(d))} funded, {eur(pag(d))} already paid. Status: {d["oc_stato_progetto"]}. CUP {d["cup"] or d["cod_locale_progetto"]}.'
+    else:
+        de = f'{taglia(ente_str(d), 38)}: {eur(fin(d))} finanziati, {eur(pag(d))} già pagati. Stato: {d["oc_stato_progetto"]}. CUP {d["cup"] or d["cod_locale_progetto"]}.'
+    pagina(f"progetti/{slug(d)}.html", titolo_vis(d), c, "opere", descr=taglia(de, 158), profondita=1, seo_titolo=t_seo)
 
 # ------------------------------------------------------------------ dati completi + CSV
 def dati_completi():
@@ -866,10 +940,39 @@ cd mini-sito</code></pre>
 # ------------------------------------------------------------------ robots, sitemap, main
 def varie():
     base = ["", "opere/", "dati/", "guida/", "guida/costruisci/", "metodo/"] + [f"progetti/{slug(d)}.html" for d in perim]
-    urls = base + ["en/" + u for u in base]
-    sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{SITO}/{u}</loc></url>\n" for u in urls) + "</urlset>\n"
+    righe = []
+    for u in base:
+        righe.append(f'<url><loc>{SITO}/{u}</loc><lastmod>{DATA_ISO}</lastmod><xhtml:link rel="alternate" hreflang="it" href="{SITO}/{u}"/><xhtml:link rel="alternate" hreflang="en" href="{SITO}/en/{u}"/><xhtml:link rel="alternate" hreflang="x-default" href="{SITO}/{u}"/></url>')
+        righe.append(f'<url><loc>{SITO}/en/{u}</loc><lastmod>{DATA_ISO}</lastmod><xhtml:link rel="alternate" hreflang="it" href="{SITO}/{u}"/><xhtml:link rel="alternate" hreflang="en" href="{SITO}/en/{u}"/><xhtml:link rel="alternate" hreflang="x-default" href="{SITO}/{u}"/></url>')
+    sm = ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + "\n".join(righe) + "\n</urlset>\n")
     open(os.path.join(SITE, "sitemap.xml"), "w").write(sm)
-    open(os.path.join(SITE, "robots.txt"), "w").write(f"User-agent: *\nAllow: /\nSitemap: {SITO}/sitemap.xml\n")
+    open(os.path.join(SITE, "robots.txt"), "w").write(f"User-agent: *\nAllow: /\n\nSitemap: {SITO}/sitemap.xml\n")
+    chiave = open(os.path.join(ROOT, "assets", "indexnow-key.txt")).read().strip()
+    open(os.path.join(SITE, chiave + ".txt"), "w").write(chiave)
+    llms = f"""# Progetti pubblici sotto casa
+
+> Sito indipendente, a titolo didattico, con dati ufficiali: mostra in parole semplici i progetti finanziati con i fondi di coesione nel Comune di Arezzo (fonte OpenCoesione, licenza CC BY 4.0). Dati aggiornati al {DATA_ISO}, ricontrollati ogni tre mesi. Disponibile in italiano e in inglese (/en/). I testi ufficiali dei progetti restano in italiano.
+
+## Pagine principali
+- [Prima pagina]({SITO}/): cosa si costruisce con i soldi pubblici ad Arezzo, importi e stato
+- [Opere e progetti]({SITO}/opere/): elenco con importo finanziato, già pagato, ente e stato
+- [Dati completi]({SITO}/dati/): tabella filtrabile, CSV e JSON dei progetti
+- [Metodo e fonti]({SITO}/metodo/): fonte, perimetro, significato dei campi
+- [Tutorial]({SITO}/guida/): guida agli open data e alle API, con esempi reali
+- [Costruisci una versione base]({SITO}/guida/costruisci/): sito di open data in Python, passo passo
+- [English version]({SITO}/en/)
+
+## Dati e codice
+- [CSV dei progetti]({SITO}/dati/progetti-arezzo.csv)
+- [JSON dei progetti]({SITO}/dati/progetti-arezzo.json)
+- [Sitemap]({SITO}/sitemap.xml)
+- [Codice su GitHub]({GH}) (licenza MIT per il codice)
+- Fonte dei dati: https://opencoesione.gov.it/it/api/
+
+## Autore
+Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche: {WWW} · {LI}
+"""
+    open(os.path.join(SITE, "llms.txt"), "w", encoding="utf-8").write(llms)
 
 if __name__ == "__main__":
     import shutil

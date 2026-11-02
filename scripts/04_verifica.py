@@ -52,6 +52,39 @@ for f in tutte:
     if not (frase in t and firma in t and 'class="fonte"' in t and "OpenCoesione" in t and 'class="lingua ' in t):
         mancano += 1
 ok(mancano == 0, f"ogni pagina (IT e EN) ha fonte, data, frase del concept, firma e cambio lingua ({mancano} mancanti)")
+# ---- SEO
+import collections as _c, html as _h
+titoli, descr_c = _c.Counter(), _c.Counter(); seo_err = []
+for f in tutte:
+    t = open(f, encoding="utf-8").read(); rel = os.path.relpath(f, SITE).replace(os.sep, "/")
+    en = rel.startswith("en/"); dirp = rel[:-len("index.html")] if rel.endswith("index.html") else rel
+    if len(re.findall(r"<h1[ >]", t)) != 1: seo_err.append(("h1", rel))
+    m = re.search(r"<title>(.*?)</title>", t, re.S); d = re.search(r'<meta name="description" content="(.*?)">', t)
+    if not m or not d: seo_err.append(("title/description mancanti", rel)); continue
+    titoli[_h.unescape(m.group(1))] += 1; descr_c[_h.unescape(d.group(1))] += 1
+    if len(_h.unescape(d.group(1))) > 165: seo_err.append(("description lunga", rel))
+    if f'<link rel="canonical" href="https://opendata.giuseppebosi.com/{rel if not rel.endswith("index.html") else dirp}">' not in t: seo_err.append(("canonical", rel))
+    base = dirp[3:] if en else dirp
+    for l, u in (("it", f"https://opendata.giuseppebosi.com/{base}"), ("en", f"https://opendata.giuseppebosi.com/en/{base}"), ("x-default", f"https://opendata.giuseppebosi.com/{base}")):
+        if f'hreflang="{l}" href="{u}"' not in t: seo_err.append(("hreflang " + l, rel))
+    for k in ('og:title', 'og:description', 'og:image', 'og:url', 'twitter:card', 'twitter:image', 'twitter:title'):
+        if k not in t: seo_err.append((k, rel))
+    ld = re.search(r'<script type="application/ld\+json">(.*?)</script>', t, re.S)
+    try:
+        j = json.loads(ld.group(1)); a = j["author"]
+        assert a["@type"] == "Person" and a["name"] == "Giuseppe Bosi" and "https://www.giuseppebosi.com" in a["sameAs"] and "https://www.linkedin.com/in/giuseppebosi" in a["sameAs"] and any("github.com/JoeBosi" in x for x in a["sameAs"])
+    except Exception as e: seo_err.append(("JSON-LD", rel))
+    if f'<html lang="{"en" if en else "it"}"' not in t: seo_err.append(("lang", rel))
+    if "github.com/JoeBosi/public-projects-near-home" not in t or "linkedin.com/in/giuseppebosi" not in t: seo_err.append(("link nel piè di pagina", rel))
+ok(not seo_err, f"SEO: h1 unico, canonical, hreflang, og/twitter, JSON-LD, lang, link nel piè di pagina su ogni pagina ({len(seo_err)} problemi: {seo_err[:3]})")
+ok(all(v == 1 for v in titoli.values()), f"title unici su {len(titoli)} pagine ({sum(1 for v in titoli.values() if v > 1)} duplicati)")
+ok(sum(v - 1 for v in descr_c.values() if v > 1) == 0, f"meta description uniche ({sum(v - 1 for v in descr_c.values() if v > 1)} duplicate)")
+sm = open(os.path.join(SITE, "sitemap.xml"), encoding="utf-8").read()
+ok(sm.count("<url>") == 2 * (6 + len(per)), f"sitemap con tutte le pagine IT e EN ({sm.count('<url>')})")
+ok("Sitemap: https://opendata.giuseppebosi.com/sitemap.xml" in open(os.path.join(SITE, "robots.txt")).read() and "Disallow" not in open(os.path.join(SITE, "robots.txt")).read(), "robots.txt indica la sitemap e non blocca pagine")
+ok(os.path.exists(os.path.join(SITE, "llms.txt")), "llms.txt presente")
+k = open(os.path.join(R, "assets", "indexnow-key.txt")).read().strip()
+ok(os.path.exists(os.path.join(SITE, k + ".txt")) and open(os.path.join(SITE, k + ".txt")).read() == k, "file chiave IndexNow alla radice")
 ok(not os.environ.get("OC_PROVA_FALLIMENTO"), "prova di fallimento richiesta (solo per collaudo)")
 print("ESITO:", "FALLITO" if errori else "PASSATO")
 sys.exit(1 if errori else 0)
