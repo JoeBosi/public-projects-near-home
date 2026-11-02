@@ -1,0 +1,7 @@
+# Sources and checks
+
+- API: `/it/api/progetti/?format=json&territorio=arezzo-comune&page_size=500&page=N` (26 pages, 12,590 projects) and one detail call per project in the working perimeter. JSON only. Above about one request per second the service answers 429: the client waits one second, retries with growing waits and caches every answer.
+- Fields: `oc_finanz_tot_pub_netto` (funded, net of savings), `tot_pagamenti` (paid; always shown separately), `oc_stato_progetto` (status, shown as declared), project-level dates (they can differ from the execution-phase dates on the official page), `data_aggiornamento` (shown in the site header).
+- Perimeter: ongoing and not started always; concluded/settled/undeterminable only with an actual end date from 2016-01-01 and only if public works / purchase of goods or funded with at least EUR 100,000. Everything else is counted separately and declared on the site (Method page). Counted + not counted = total of the list; the build asserts that list totals equal detail totals.
+- `scripts/04_verifica.py` recomputes sums independently from the raw files, compares them with the CSV, checks page counts, empty/None values, header, signature and language switch on every page.
+- Official pages of OpenCoesione are JavaScript shells: comparison with them was done by hand in a browser on five projects (payments, public cost and status matched; end dates differ as explained above).
