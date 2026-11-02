@@ -1,0 +1,3 @@
+[allowlist]
+description = "Project codes used as JSON keys are not secrets"
+paths = ["dati/titoli_.*\\.json"]
