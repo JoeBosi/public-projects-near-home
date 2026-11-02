@@ -537,35 +537,35 @@ def metodo():
     c = f"""<h1>Metodo e fonti</h1>
 <p class="data">Dati aggiornati al {DATA_DATI}</p>
 <h2>Fonte</h2>
-<p>Tutti i progetti vengono dalla API pubblica di <a href="https://opencoesione.gov.it/it/api/">OpenCoesione</a>, il portale ufficiale sui progetti finanziati dalle politiche di coesione, curato con la Ragioneria Generale dello Stato. Licenza: <a href="https://creativecommons.org/licenses/by/4.0/deed.it">Creative Commons Attribuzione 4.0</a> (si può riusare citando la fonte). Data di aggiornamento dichiarata dalla API: 30/06/2026. Non usiamo altre fonti per i progetti.</p>
+<p>Tutti i progetti vengono dalla API pubblica di <a href="https://opencoesione.gov.it/it/api/">OpenCoesione</a>, il portale ufficiale sui progetti finanziati dalle politiche di coesione, curato con la Ragioneria Generale dello Stato. Licenza: <a href="https://creativecommons.org/licenses/by/4.0/deed.it">Creative Commons Attribuzione 4.0</a> (si può riusare citando la fonte). Data di aggiornamento dichiarata dalla API: 30/06/2026. Per i progetti usiamo solo questa fonte.</p>
 <h2>Che cosa abbiamo preso</h2>
 <p>I progetti localizzati nel Comune di Arezzo (parametro <code>territorio=arezzo-comune</code>): {n_lista} in totale, dal ciclo di programmazione 2000-2006 in poi. Di questi mostriamo quelli del perimetro seguente.</p>
-<h2>Perimetro: cosa è contato e cosa no</h2>
+<h2>Perimetro: cosa è contato e dove trovi il resto</h2>
 <p><strong>Contati ({pl(n_perim, 'progetto', 'progetti')}, {eur(tot_fin)} finanziati, {eur(tot_pag)} già pagati):</strong></p>
 <ul><li>tutti i progetti con stato «In corso» o «Non avviato»;</li>
-<li>i progetti «Concluso», «Liquidato» o «Non determinabile» con data di fine effettiva dal 1° gennaio 2016, ma solo se sono opere (lavori pubblici o acquisto di beni) oppure hanno un finanziamento di almeno 100.000 €. Poiché la data di fine di progetto può non coincidere con quella della scheda ufficiale (che spesso indica la fine dei lavori), il confine del 2016 va inteso «secondo il campo di progetto».</li></ul>
-<p><strong>Non contati ({format(n_fuori, ",").replace(",", ".")} progetti, {eur(fuori_fin)} finanziati, {eur(fuori_pag)} già pagati):</strong></p>
-<ul><li><strong>{format(non_esaminati, ",").replace(",", ".")}</strong> progetti conclusi, sotto 100.000 € e non opere (per lo più corsi, voucher e contributi individuali). Per rispettare i limiti di frequenza della API non ne abbiamo scaricato il dettaglio, quindi per loro non conosciamo la data di fine: la loro somma viene dalla lista di OpenCoesione.</li>
-<li><strong>{len(senza_data)}</strong> progetti, tra quelli scaricati, conclusi senza data di fine effettiva.</li>
+<li>i progetti «Concluso», «Liquidato» o «Non determinabile» con data di fine effettiva dal 1° gennaio 2016, ma solo se sono opere (lavori pubblici o acquisto di beni) oppure hanno un finanziamento di almeno 100.000 €. Poiché la data di fine di progetto può differire da quella della scheda ufficiale (che spesso indica la fine dei lavori), il confine del 2016 va inteso «secondo il campo di progetto».</li></ul>
+<p><strong>Il resto dei progetti, indicato a parte ({format(n_fuori, ",").replace(",", ".")} progetti, {eur(fuori_fin)} finanziati, {eur(fuori_pag)} già pagati):</strong></p>
+<ul><li><strong>{format(non_esaminati, ",").replace(",", ".")}</strong> progetti conclusi, di importo inferiore a 100.000 € e diversi dalle opere (per lo più corsi, voucher e contributi individuali). Per rispettare i limiti di frequenza della API, di questi progetti usiamo la lista di OpenCoesione, importi compresi; la data di fine di ciascuno si trova nella sua scheda ufficiale.</li>
+<li><strong>{len(senza_data)}</strong> progetti, tra quelli scaricati, conclusi con la data di fine effettiva mancante.</li>
 <li><strong>{len(prima_2016)}</strong> progetti, tra quelli scaricati, con fine effettiva prima del 2016.</li></ul>
-<p>Totale di tutti i progetti di Arezzo nella banca dati: {pl(n_lista, 'progetto', 'progetti')}, {eur(tot_lista)} finanziati, {eur(tot_lista_pag)} già pagati. Contati e non contati sommano a questo totale. Per i progetti contati, i totali calcolati dalle schede di dettaglio coincidono con quelli ricavati dalla lista (controllo automatico a ogni costruzione del sito). Finanziato e pagato non sono confrontabili progetto per progetto: in alcuni casi il pagato supera il finanziato netto.</p>
+<p>Totale di tutti i progetti di Arezzo nella banca dati: {pl(n_lista, 'progetto', 'progetti')}, {eur(tot_lista)} finanziati, {eur(tot_lista_pag)} già pagati. Progetti contati e resto dei progetti sommano a questo totale. Per i progetti contati, i totali calcolati dalle schede di dettaglio coincidono con quelli ricavati dalla lista (controllo automatico a ogni costruzione del sito). Finanziato e pagato sono due misure distinte: in alcuni casi il pagato supera il finanziato netto.</p>
 <h2>Significato dei campi</h2>
 <ul><li><strong>Finanziato</strong>: campo <code>oc_finanz_tot_pub_netto</code>, finanziamento pubblico totale al netto delle economie, cioè dei risparmi già tolti.</li>
-<li><strong>Già pagato</strong>: campo <code>tot_pagamenti</code>, pagamenti totali registrati. Finanziato e pagato sono sempre mostrati separati e non vanno confusi: un progetto può avere pagato più o meno del finanziato.</li>
+<li><strong>Già pagato</strong>: campo <code>tot_pagamenti</code>, pagamenti totali registrati. Finanziato e pagato sono sempre mostrati separati, come due misure distinte: un progetto può avere pagato più o meno del finanziato.</li>
 <li id="glossario"><strong>Stato</strong>: campo <code>oc_stato_progetto</code>, riportato esattamente come dichiarato dalla fonte (In corso, Non avviato, Concluso, Liquidato, Non determinabile).</li>
 <li><strong>Date</strong>: inizio, fine prevista e fine effettiva del progetto (campi <code>oc_data_inizio_progetto</code>, <code>oc_data_fine_progetto_prevista</code>, <code>oc_data_fine_progetto_effettiva</code>) sono quelle riferite all'intero progetto, comunicate dagli enti. La scheda ufficiale su OpenCoesione mostra invece, in alto, le date dell'esecuzione dei lavori, che possono differire (controllo fatto a mano su tre progetti: pagamenti identici, date di fine diverse per questo motivo). Le date di ogni fase sono riportate nelle schede. Se una data manca, il sito scrive «dato non disponibile».</li>
 <li><strong>Argomento</strong>: tema sintetico di OpenCoesione, con nomi più brevi (per esempio «Trasporti e mobilità» diventa «Strade e trasporti»).</li>
 <li><strong>Opere e acquisti</strong>: progetti con natura CUP «Realizzazione di lavori pubblici» o «Acquisto di beni». Tutto il resto è «contributi, incentivi e servizi».</li></ul>
 <h2>Etichette</h2>
-<p>Per i progetti con stato «In corso» o «Non avviato», con data di fine prevista precedente al 30/06/2026 e senza data di fine effettiva, il sito scrive «scadenza superata secondo i dati». È un confronto tra due date della fonte, non un giudizio.</p>
+<p>Per i progetti con stato «In corso» o «Non avviato», con data di fine prevista precedente al 30/06/2026 e data di fine effettiva assente, il sito scrive «scadenza superata secondo i dati». È un confronto tra due date della fonte, a titolo informativo.</p>
 <h2>Titoli riscritti</h2>
-<p>Alcuni titoli, in origine tecnici o in maiuscolo, sono riscritti in italiano semplice con un assistente di intelligenza artificiale (IA), solo a partire dal titolo e dalla sintesi ufficiali e senza aggiungere informazioni. Accanto c'è sempre il titolo originale e la scritta «titolo riscritto in italiano semplice». I titoli in maiuscolo non riscritti sono mostrati con la sola iniziale maiuscola.</p>
+<p>Alcuni titoli, in origine tecnici o in maiuscolo, sono riscritti in italiano semplice con un assistente di intelligenza artificiale (IA), solo a partire dal titolo e dalla sintesi ufficiali usando solo le informazioni già presenti. Accanto c'è sempre il titolo originale e la scritta «titolo riscritto in italiano semplice». I titoli in maiuscolo mantenuti come sono vengono mostrati con la sola iniziale maiuscola.</p>
 <h2>Arrotondamenti</h2>
 <p>Gli importi sono mostrati in euro interi, arrotondati; le somme sono calcolate sui valori originali e poi arrotondate, quindi la somma di cifre mostrate può differire di qualche euro. Le percentuali sono arrotondate all'intero.</p>
 <h2>Limiti</h2>
-<ul><li>Il sito mostra i progetti per Comune, non per indirizzo: la fonte non fornisce coordinate.</li>
-<li>I progetti localizzati in più territori compaiono anche in quelli: gli importi non sono ripartiti tra i Comuni.</li>
-<li>Non abbiamo un confronto con altri Comuni: richiederebbe lo stesso perimetro e dati demografici verificati.</li>
+<ul><li>Il sito mostra i progetti per Comune: la fonte indica il Comune in cui ciascun progetto è localizzato.</li>
+<li>I progetti localizzati in più territori compaiono anche in quelli: gli importi sono quelli complessivi del progetto, riferiti a tutti i suoi territori.</li>
+<li>Il sito è dedicato ad Arezzo; un confronto con altri Comuni richiederebbe lo stesso perimetro e dati demografici verificati.</li>
 <li>Nei titoli degli interventi individuali a favore di persone fisiche il nome è omesso dal sito («[nome omesso]»), anche se presente nella fonte.</li>
 <li>Alcuni testi della fonte contengono caratteri sostituiti da «?» (per esempio apostrofi e accenti): sono nei dati originali.</li></ul>
 <h2>Come verificare</h2>
@@ -655,23 +655,23 @@ for p in dati["results"]:
 def metodo_en():
     c = f"""<h1>Method and sources</h1>
 <p class="data">Data updated to {DATA_ISO}</p>
-<p class="small mu"><strong>Language note.</strong> This page is the English version. Project titles, descriptions, topics, statuses and body names come from the official source and stay in Italian; they are never translated on this site.</p>
+<p class="small mu"><strong>Language note.</strong> This page is the English version. Project titles, descriptions, topics, statuses and body names come from the official source and stay in Italian; they are shown in Italian, as published.</p>
 <h2>Source</h2>
-<p>All projects come from the public API of <a href="https://opencoesione.gov.it/it/api/">OpenCoesione</a>, the official Italian portal on projects funded by cohesion policy, run with the State General Accounting Department. Licence: <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0</a> (reuse is allowed if you credit the source). Update date declared by the API: {DATA_ISO}. We use no other source for projects.</p>
+<p>All projects come from the public API of <a href="https://opencoesione.gov.it/it/api/">OpenCoesione</a>, the official Italian portal on projects funded by cohesion policy, run with the State General Accounting Department. Licence: <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0</a> (reuse is allowed if you credit the source). Update date declared by the API: {DATA_ISO}. For projects we use only this source.</p>
 <h2>What we took</h2>
 <p>The projects located in the Municipality of Arezzo (parameter <code>territorio=arezzo-comune</code>): {n_lista} in total, from the 2000-2006 programming cycle onwards. We show those that fall in the perimeter below.</p>
-<h2>Perimeter: what is counted and what is not</h2>
+<h2>Perimeter: what is counted and where to find the rest</h2>
 <p><strong>Counted ({n_perim} projects, {eur(tot_fin)} funded, {eur(tot_pag)} already paid):</strong></p>
 <ul><li>all projects with status «In corso» (ongoing) or «Non avviato» (not started);</li>
 <li>projects «Concluso», «Liquidato» or «Non determinabile» with an actual end date from 1 January 2016, but only if they are works (public works or purchase of goods) or have funding of at least €100,000. The project end date may differ from the one on the official page (which often shows the end of works), so the 2016 boundary is meant «according to the project field».</li></ul>
-<p><strong>Not counted ({format(n_fuori, ",")} projects, {eur(fuori_fin)} funded, {eur(fuori_pag)} already paid):</strong></p>
-<ul><li><strong>{format(non_esaminati, ",")}</strong> concluded projects, under €100,000 and not works (mostly training courses, vouchers and individual grants). To respect the API's rate limits we did not download their detail, so we do not know their end date: their sum comes from the OpenCoesione list.</li>
-<li><strong>{len(senza_data)}</strong> projects, among those downloaded, concluded with no actual end date.</li>
+<p><strong>The rest of the projects, listed separately ({format(n_fuori, ",")} projects, {eur(fuori_fin)} funded, {eur(fuori_pag)} already paid):</strong></p>
+<ul><li><strong>{format(non_esaminati, ",")}</strong> concluded projects of less than €100,000 other than works (mostly training courses, vouchers and individual grants). To respect the API's rate limits, for these projects we use the OpenCoesione list, amounts included; the end date of each one is on its official page.</li>
+<li><strong>{len(senza_data)}</strong> projects, among those downloaded, concluded with the actual end date missing.</li>
 <li><strong>{len(prima_2016)}</strong> projects, among those downloaded, with an actual end before 2016.</li></ul>
-<p>Total of all projects of Arezzo in the database: {n_lista} projects, {eur(tot_lista)} funded, {eur(tot_lista_pag)} already paid. Counted and not counted add up to this total. For the counted projects, the totals computed from the detail records match those taken from the list (automatic check at every build). Funded and paid cannot be compared project by project: in some cases the paid amount exceeds the net funded amount.</p>
+<p>Total of all projects of Arezzo in the database: {n_lista} projects, {eur(tot_lista)} funded, {eur(tot_lista_pag)} already paid. Counted projects and the rest of the projects add up to this total. For the counted projects, the totals computed from the detail records match those taken from the list (automatic check at every build). Funded and paid are two distinct measures: in some cases the paid amount exceeds the net funded amount.</p>
 <h2>Meaning of the fields</h2>
 <ul><li><strong>Funded</strong>: field <code>oc_finanz_tot_pub_netto</code>, total public funding net of savings (amounts already deducted).</li>
-<li><strong>Already paid</strong>: field <code>tot_pagamenti</code>, total payments recorded. Funded and paid are always shown separately and must not be confused.</li>
+<li><strong>Already paid</strong>: field <code>tot_pagamenti</code>, total payments recorded. Funded and paid are always shown separately, as two distinct measures.</li>
 <li><strong>Status</strong>: field <code>oc_stato_progetto</code>, reported exactly as declared by the source.</li>
 <li><strong>Dates</strong>: start, planned end and actual end of the project (fields <code>oc_data_inizio_progetto</code>, <code>oc_data_fine_progetto_prevista</code>, <code>oc_data_fine_progetto_effettiva</code>) refer to the whole project, as reported by the bodies. The official OpenCoesione page shows, at the top, the dates of the execution of works, which can differ (hand check on three projects: identical payments, different end dates for this reason). If a date is missing the site writes «not available».</li>
 <li><strong>Topic</strong>: OpenCoesione's synthetic theme, with shorter plain names on the home page.</li>
@@ -680,15 +680,15 @@ def metodo_en():
 <p>These are the only status values that appear in the data. We keep the Italian word on the site because it is the value declared by the source; the English meaning is given here as a help.</p>
 <ul><li><span lang="it">In corso</span>: ongoing</li><li><span lang="it">Non avviato</span>: not started</li><li><span lang="it">Concluso</span>: concluded</li><li><span lang="it">Liquidato</span>: settled (payments completed)</li><li><span lang="it">Non determinabile</span>: not determinable (the source could not determine the status)</li></ul>
 <h2>Labels</h2>
-<p>For projects with status «In corso» or «Non avviato», with a planned end date earlier than the data date and no actual end date, the site writes «deadline passed according to the data». It is a comparison between two dates of the source, not a judgement.</p>
+<p>For projects with status «In corso» or «Non avviato», with a planned end date earlier than the data date and the actual end date missing, the site writes «deadline passed according to the data». It is a comparison between two dates of the source, for information only.</p>
 <h2>Rewritten titles</h2>
-<p>Some titles, originally technical or in capitals, are rewritten in plain Italian with an artificial intelligence (AI) assistant, only from the official title and summary and without adding information. The original title is always shown beside it. Capitalised titles that are not rewritten are shown with only the first letter in capitals. New projects keep the official title until they are simplified.</p>
+<p>Some titles, originally technical or in capitals, are rewritten in plain Italian with an artificial intelligence (AI) assistant, only from the official title and summary using only the information already there. The original title is always shown beside it. Capitalised titles kept as they are are shown with only the first letter in capitals. New projects keep the official title until they are simplified.</p>
 <h2>Rounding</h2>
 <p>Amounts are shown in whole euros, rounded; sums are computed on the original values and then rounded, so the sum of the figures shown may differ by a few euros.</p>
 <h2>Limits</h2>
-<ul><li>The site shows projects by municipality, not by address: the source gives no coordinates.</li>
-<li>Projects located in several territories also appear in those: amounts are not split between municipalities.</li>
-<li>There is no comparison with other municipalities: it would need the same perimeter and verified demographic data.</li>
+<ul><li>The site shows projects by municipality: the source gives the municipality where each project is located.</li>
+<li>Projects located in several territories also appear in those: amounts are the project's overall figures, covering all its territories.</li>
+<li>The site is dedicated to Arezzo; a comparison with other municipalities would need the same perimeter and verified demographic data.</li>
 <li>In titles of individual interventions in favour of natural persons the name is omitted from the site («[nome omesso]»), even if present in the source.</li>
 <li>Some texts of the source contain characters replaced by «?» (for example apostrophes and accents): they are in the original data.</li></ul>
 <h2>How to check</h2>
