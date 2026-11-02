@@ -80,6 +80,12 @@ NATURA_SEMPLICE = {
 }
 natura = lambda d: NATURA_SEMPLICE.get(d["cup_descr_natura"], frase(d["cup_descr_natura"]))
 
+RX_PERSONA = re.compile(r"(A FAVORE DI|-)\s+[^()]+?\s*\(\*CODICE FISCALE\*\)", re.I)
+
+def pulisci(t):
+    """Omette il nome delle persone fisiche nei titoli degli interventi individuali."""
+    return RX_PERSONA.sub(lambda m: m.group(1) + " [nome omesso] (codice fiscale omesso)", t or "")
+
 def carica():
     ds = []
     for p in glob.glob(os.path.join(api.CACHE, "*.json")):
@@ -92,6 +98,9 @@ def carica():
     uniq = {}
     for d in ds:
         uniq[d["cod_locale_progetto"]] = d
+    for d in uniq.values():
+        d["oc_titolo_progetto"] = pulisci(d["oc_titolo_progetto"])
+        d["oc_sintesi_progetto"] = pulisci(d.get("oc_sintesi_progetto"))
     return list(uniq.values())
 
 def enti(d):
@@ -106,6 +115,7 @@ def ente_str(d):
 CSS = """
 :root{--bg:#fff;--tx:#1b2330;--mu:#566074;--ac:#0b5cab;--l:#d9e0ea;--sf:#f4f7fb;--ok:#2f7d4f}
 *{box-sizing:border-box}body{margin:0;font:18px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tx);background:var(--bg)}
+main p,main li,main dd,main h1,main h2,main h3{overflow-wrap:anywhere}
 a{color:var(--ac)}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
 .w{max-width:960px;margin:0 auto;padding:0 16px}
 header.top{border-bottom:1px solid var(--l);background:var(--sf)}
@@ -151,8 +161,7 @@ def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
     open(p, "w", encoding="utf-8").write(doc)
 
 def avviso():
-    return ('<p class="avv"><strong>Cosa dicono questi dati, e cosa no.</strong> Dicono quanti soldi pubblici sono stati assegnati a un progetto e quanti ne sono già stati pagati, '
-            'secondo quanto comunicato dagli enti. Non dicono come è stata fatta l\'opera né se funziona bene. I dati possono non riflettere lo stato reale.</p>')
+    return ('<p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l\'opera. Possono non riflettere lo stato reale.</p>')
 
 URLMAP = {}
 
@@ -167,9 +176,13 @@ tutti = carica()
 lista = json.load(open(os.path.join(ROOT, "dati", "lista_arezzo.json"), encoding="utf-8"))
 URLMAP.update({r["cod_locale_progetto"]: r["url"] for r in lista})
 semplici = {}
-sp = os.path.join(ROOT, "dati", "titoli_semplici.json")
+for i in (1, 2, 3):
+    pi = os.path.join(ROOT, "dati", f"titoli_{i}.json")
+    if os.path.exists(pi):
+        semplici.update({k: {"titolo": v} for k, v in json.load(open(pi, encoding="utf-8")).items() if v})
+sp = os.path.join(ROOT, "dati", "titoli_semplici.json")   # riscritture fatte a mano, hanno la precedenza
 if os.path.exists(sp):
-    semplici = json.load(open(sp, encoding="utf-8"))
+    semplici.update(json.load(open(sp, encoding="utf-8")))
 
 def nel_perimetro(d):
     s = d["oc_stato_progetto"]
@@ -192,6 +205,14 @@ n_perim = len(perim)
 n_lista = len(lista)
 tot_lista = sum(num(r["oc_finanz_tot_pub_netto"]) for r in lista)
 non_esaminati = n_lista - len(tutti)
+pc = {d["cod_locale_progetto"] for d in perim}
+fp = lambda rs: (sum(num(r["oc_finanz_tot_pub_netto"]) for r in rs), sum(num(r["tot_pagamenti"]) for r in rs))
+fuori = [r for r in lista if r["cod_locale_progetto"] not in pc]
+n_fuori = len(fuori)
+fuori_fin, fuori_pag = fp(fuori)
+tot_lista_pag = fp(lista)[1]
+chk = fp([r for r in lista if r["cod_locale_progetto"] in pc])
+assert round(chk[0]) == round(tot_fin) and round(chk[1]) == round(tot_pag), "lista e dettagli non coincidono"
 
 def titolo_vis(d):
     s = semplici.get(d["cod_locale_progetto"])
@@ -243,17 +264,17 @@ def home():
     ope = [d for d in perim if is_opera(d)]
     c = f"""
 <h1>Quali progetti pubblici riguardano Arezzo?</h1>
-<p class="lead">Questa pagina mostra, con i dati ufficiali, i soldi pubblici assegnati a progetti nel Comune di Arezzo attraverso i fondi di coesione: risorse europee e nazionali destinate a ridurre le differenze tra territori. Non serve conoscere la materia: ogni cifra ha accanto la spiegazione.</p>
+<p class="lead">Qui trovi i progetti del Comune di Arezzo finanziati con i fondi di coesione (risorse europee e nazionali per ridurre le differenze tra territori), con importi e stato presi dai dati ufficiali.</p>
 <p class="data"><strong>Dati aggiornati al {DATA_DATI}</strong> · Fonte: OpenCoesione</p>
-{avviso()}
+<p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l'opera. Possono non riflettere lo stato reale.</p>
 
-<h2>1. Quanti soldi sono arrivati ad Arezzo?</h2>
-<p>Consideriamo i progetti ancora aperti o conclusi dal 2016 in poi: {pl(n_perim, 'progetto', 'progetti')}. Le due cifre sono diverse: la prima è la somma <em>assegnata</em>, la seconda è quella <em>già pagata</em>.</p>
+<h2>1. Quanti soldi riguardano i progetti principali di Arezzo?</h2>
+<p>Contiamo <strong>{pl(n_perim, 'progetto', 'progetti')}</strong>: tutti quelli in corso o non ancora avviati e quelli conclusi dal 2016 che sono opere o valgono almeno 100.000 €. Le due cifre sono diverse: la prima è la somma <em>assegnata</em>, la seconda quella <em>già pagata</em>.</p>
 <div class="cards">
-<div class="card fin"><div class="n">{eur(tot_fin)}</div><div><strong>Finanziato</strong>: soldi pubblici assegnati ai progetti.</div></div>
+<div class="card fin"><div class="n">{eur(tot_fin)}</div><div><strong>Finanziato</strong>: soldi pubblici assegnati.</div></div>
 <div class="card pag"><div class="n">{eur(tot_pag)}</div><div><strong>Già pagato</strong>: soldi usciti davvero, secondo i dati.</div></div>
 </div>
-<p class="small mu">Il pagato può essere inferiore al finanziato perché i progetti sono ancora in corso o perché alcune voci non sono ancora state pagate o comunicate. Come si calcola: pagina <a href="metodo/">Metodo e fonti</a>.</p>
+<p><strong>Cosa non è contato.</strong> Nei dati di Arezzo ci sono altri {n_fuori:} progetti, per {eur(fuori_fin)} finanziati e {eur(fuori_pag)} già pagati: per lo più piccoli progetti già conclusi (corsi, contributi alle persone), oppure conclusi prima del 2016 o senza data di fine. Con tutti i progetti insieme il totale sarebbe {eur(tot_lista)} finanziati e {eur(tot_lista_pag)} già pagati. Dettagli nel <a href="metodo/">Metodo e fonti</a>.</p>
 
 <h2>2. Per fare cosa?</h2>
 <p>I progetti sono raggruppati per argomento. Le <strong>opere e gli acquisti</strong> ({pl(op_n, 'progetto', 'progetti')}) sono separati dai contributi, dagli incentivi e dai servizi, che sono molto più numerosi ma di importo singolo più piccolo. La barra blu è il finanziato, quella verde il già pagato.</p>
@@ -301,6 +322,8 @@ def scheda(d):
         for f in d.get("fasi_procedurali", []))
     fasi_t = f'<h2>Fasi dichiarate</h2><div class="sc"><table><tr><th>Fase</th><th>Inizio previsto</th><th>Inizio effettivo</th><th>Fine prevista</th><th>Fine effettiva</th></tr>{fasi}</table></div>' if fasi else ""
     s = semplici.get(d["cod_locale_progetto"])
+    if s and s["titolo"].strip() == (d["oc_titolo_progetto"] or "").strip():
+        s = None
     orig = (f'<p class="small mu">Titolo riscritto in italiano semplice a partire dal titolo e dalla sintesi ufficiali. Titolo originale: «{esc(d["oc_titolo_progetto"])}»</p>' if s
             else "")
     sint = d.get("oc_sintesi_progetto") or ""
@@ -318,7 +341,7 @@ def scheda(d):
 <dt>Chi se ne occupa</dt><dd>{esc(ente_str(d))}</dd><dt>Stato dichiarato</dt><dd>{esc(d['oc_stato_progetto'])}{' · fase: ' + esc(d['oc_descr_fase_corrente']) if d.get('oc_descr_fase_corrente') else ''}</dd>
 <dt>Inizio del progetto</dt><dd>{data(d['oc_data_inizio_progetto'])}</dd><dt>Fine prevista del progetto</dt><dd>{data(d['oc_data_fine_progetto_prevista'])}</dd><dt>Fine effettiva del progetto</dt><dd>{data(d['oc_data_fine_progetto_effettiva'])}</dd>
 <dt>CUP</dt><dd>{esc(d['cup'] or 'dato non disponibile')} <span class="small mu">(Codice Unico di Progetto)</span></dd><dt>Ciclo</dt><dd>{esc(d['oc_descr_ciclo'])}</dd></dl>
-<p class="small mu">Le date sopra sono quelle riferite all'intero progetto, comunicate dall'ente. La scheda ufficiale di OpenCoesione può mostrare invece le date di una singola fase, per esempio l'esecuzione dei lavori, che possono essere diverse: le fasi sono elencate più sotto.</p>
+<p class="small mu">«Dato non disponibile» significa che l'ente non ha comunicato quel dato alla fonte. Le date sopra sono quelle riferite all'intero progetto, comunicate dall'ente. La scheda ufficiale di OpenCoesione può mostrare invece le date di una singola fase, per esempio l'esecuzione dei lavori, che possono essere diverse: le fasi sono elencate più sotto.</p>
 <h2>Da dove vengono i soldi</h2><ul>{ripd}</ul>
 {sint_h}{fasi_t}
 <h2>Fonte</h2>
@@ -371,14 +394,16 @@ def metodo():
 <h2>Fonte</h2>
 <p>Tutti i progetti vengono dalla API pubblica di <a href="https://opencoesione.gov.it/it/api/">OpenCoesione</a>, il portale ufficiale sui progetti finanziati dalle politiche di coesione, curato con la Ragioneria Generale dello Stato. Licenza: <a href="https://creativecommons.org/licenses/by/4.0/deed.it">Creative Commons Attribuzione 4.0</a> (si può riusare citando la fonte). Data di aggiornamento dichiarata dalla API: 30/06/2026. Non usiamo altre fonti per i progetti.</p>
 <h2>Che cosa abbiamo preso</h2>
-<p>I progetti localizzati nel Comune di Arezzo (parametro <code>territorio=arezzo-comune</code>): {n_lista} in totale, con {eur(tot_lista)} di finanziamento pubblico netto complessivo dal ciclo 2000-2006 in poi. Di questi mostriamo quelli del perimetro seguente.</p>
-<h2>Perimetro</h2>
-<ul><li>Progetti con stato «In corso» o «Non avviato», sempre.</li>
-<li>Progetti «Concluso», «Liquidato» o «Non determinabile» solo se la data di fine effettiva del progetto è dal 1° gennaio 2016 in poi. Poiché questa data può non coincidere con quella mostrata dalla scheda ufficiale (che spesso indica la fine dei lavori), il confine del 2016 va inteso «secondo il campo di progetto».</li>
-<li>Progetti conclusi senza data di fine effettiva: <strong>{len(senza_data)}</strong>, esclusi dai conteggi principali.</li>
-<li>Progetti conclusi con data di fine effettiva prima del 2016: <strong>{len(prima_2016)}</strong>, esclusi.</li>
-<li>Per rispettare i limiti di frequenza della API non abbiamo scaricato il dettaglio di {non_esaminati} progetti: sono conclusi, di importo inferiore a 100.000 € e non sono opere (per lo più corsi, voucher e contributi individuali). Non sono quindi nei conteggi, perché senza dettaglio non conosciamo la data di fine.</li></ul>
-<p>Risultato: <strong>{n_perim}</strong> progetti nel perimetro.</p>
+<p>I progetti localizzati nel Comune di Arezzo (parametro <code>territorio=arezzo-comune</code>): {n_lista} in totale, dal ciclo di programmazione 2000-2006 in poi. Di questi mostriamo quelli del perimetro seguente.</p>
+<h2>Perimetro: cosa è contato e cosa no</h2>
+<p><strong>Contati ({pl(n_perim, 'progetto', 'progetti')}, {eur(tot_fin)} finanziati, {eur(tot_pag)} già pagati):</strong></p>
+<ul><li>tutti i progetti con stato «In corso» o «Non avviato»;</li>
+<li>i progetti «Concluso», «Liquidato» o «Non determinabile» con data di fine effettiva dal 1° gennaio 2016, ma solo se sono opere (lavori pubblici o acquisto di beni) oppure hanno un finanziamento di almeno 100.000 €. Poiché la data di fine di progetto può non coincidere con quella della scheda ufficiale (che spesso indica la fine dei lavori), il confine del 2016 va inteso «secondo il campo di progetto».</li></ul>
+<p><strong>Non contati ({format(n_fuori, ",").replace(",", ".")} progetti, {eur(fuori_fin)} finanziati, {eur(fuori_pag)} già pagati):</strong></p>
+<ul><li><strong>{format(non_esaminati, ",").replace(",", ".")}</strong> progetti conclusi, sotto 100.000 € e non opere (per lo più corsi, voucher e contributi individuali). Per rispettare i limiti di frequenza della API non ne abbiamo scaricato il dettaglio, quindi per loro non conosciamo la data di fine: la loro somma viene dalla lista di OpenCoesione.</li>
+<li><strong>{len(senza_data)}</strong> progetti, tra quelli scaricati, conclusi senza data di fine effettiva.</li>
+<li><strong>{len(prima_2016)}</strong> progetti, tra quelli scaricati, con fine effettiva prima del 2016.</li></ul>
+<p>Totale di tutti i progetti di Arezzo nella banca dati: {pl(n_lista, 'progetto', 'progetti')}, {eur(tot_lista)} finanziati, {eur(tot_lista_pag)} già pagati. Contati e non contati sommano a questo totale. Per i progetti contati, i totali calcolati dalle schede di dettaglio coincidono con quelli ricavati dalla lista (controllo automatico a ogni costruzione del sito). Finanziato e pagato non sono confrontabili progetto per progetto: in alcuni casi il pagato supera il finanziato netto.</p>
 <h2>Significato dei campi</h2>
 <ul><li><strong>Finanziato</strong>: campo <code>oc_finanz_tot_pub_netto</code>, finanziamento pubblico totale al netto delle economie, cioè dei risparmi già tolti.</li>
 <li><strong>Già pagato</strong>: campo <code>tot_pagamenti</code>, pagamenti totali registrati. Finanziato e pagato sono sempre mostrati separati e non vanno confusi: un progetto può avere pagato più o meno del finanziato.</li>
@@ -396,6 +421,7 @@ def metodo():
 <ul><li>Il sito mostra i progetti per Comune, non per indirizzo: la fonte non fornisce coordinate.</li>
 <li>I progetti localizzati in più territori compaiono anche in quelli: gli importi non sono ripartiti tra i Comuni.</li>
 <li>Non abbiamo un confronto con altri Comuni: richiederebbe lo stesso perimetro e dati demografici verificati.</li>
+<li>Nei titoli degli interventi individuali a favore di persone fisiche il nome è omesso dal sito («[nome omesso]»), anche se presente nella fonte.</li>
 <li>Alcuni testi della fonte contengono caratteri sostituiti da «?» (per esempio apostrofi e accenti): sono nei dati originali.</li></ul>
 <h2>Come verificare</h2>
 <p>Ogni scheda ha il link alla pagina ufficiale e il link alla risposta esatta della API. Vedi la <a href="../guida/">Guida agli open data</a>.</p>"""
