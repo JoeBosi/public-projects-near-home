@@ -5,7 +5,7 @@
 A static website that shows, in plain language, the projects funded with Italian and European cohesion funds in the Municipality of Arezzo, built from the official [OpenCoesione](https://opencoesione.gov.it/it/api/) API.
 
 Demo: https://opendata.giuseppebosi.com (Italian, with an English interface under `/en/`).
-Educational concept using official data. Not an institutional website.
+Independent project, for educational purposes, using official data.
 
 ## Data source and licence
 

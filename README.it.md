@@ -5,7 +5,7 @@
 Sito statico che mostra, in parole semplici, i progetti finanziati con i fondi di coesione nel Comune di Arezzo, costruito con la API ufficiale di [OpenCoesione](https://opencoesione.gov.it/it/api/).
 
 Demo: https://opendata.giuseppebosi.com (italiano, con interfaccia inglese sotto `/en/`).
-Concept a titolo didattico, con dati ufficiali. Non è un sito istituzionale.
+Progetto indipendente, a titolo didattico, con dati ufficiali.
 
 ## Fonte e licenza
 
