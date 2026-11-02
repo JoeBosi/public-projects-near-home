@@ -274,7 +274,7 @@ def home():
 <div class="card fin"><div class="n">{eur(tot_fin)}</div><div><strong>Finanziato</strong>: soldi pubblici assegnati.</div></div>
 <div class="card pag"><div class="n">{eur(tot_pag)}</div><div><strong>Già pagato</strong>: soldi usciti davvero, secondo i dati.</div></div>
 </div>
-<p><strong>Cosa non è contato.</strong> Nei dati di Arezzo ci sono altri {n_fuori:} progetti, per {eur(fuori_fin)} finanziati e {eur(fuori_pag)} già pagati: per lo più piccoli progetti già conclusi (corsi, contributi alle persone), oppure conclusi prima del 2016 o senza data di fine. Con tutti i progetti insieme il totale sarebbe {eur(tot_lista)} finanziati e {eur(tot_lista_pag)} già pagati. Dettagli nel <a href="metodo/">Metodo e fonti</a>.</p>
+<p><strong>Cosa non è contato.</strong> Nei dati di Arezzo ci sono altri {format(n_fuori, ",").replace(",", ".")} progetti, per {eur(fuori_fin)} finanziati e {eur(fuori_pag)} già pagati: per lo più piccoli progetti già conclusi (corsi, contributi alle persone), oppure conclusi prima del 2016 o senza data di fine. Con tutti i progetti insieme il totale sarebbe {eur(tot_lista)} finanziati e {eur(tot_lista_pag)} già pagati. Dettagli nel <a href="metodo/">Metodo e fonti</a>.</p>
 
 <h2>2. Per fare cosa?</h2>
 <p>I progetti sono raggruppati per argomento. Le <strong>opere e gli acquisti</strong> ({pl(op_n, 'progetto', 'progetti')}) sono separati dai contributi, dagli incentivi e dai servizi, che sono molto più numerosi ma di importo singolo più piccolo. La barra blu è il finanziato, quella verde il già pagato.</p>
