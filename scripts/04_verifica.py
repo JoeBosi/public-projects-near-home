@@ -41,6 +41,17 @@ if PREC and os.path.exists(os.path.join(PREC, "dati", "progetti-arezzo.csv")):
     ok(abs(len(rows) - len(prev)) <= 0.15 * len(prev), f"perimetro {len(rows)} vs pubblicato {len(prev)}: variazione entro il 15%")
     pf = sum(float(r["finanziato_euro"]) for r in prev); nf = sum(float(r["finanziato_euro"]) for r in rows)
     ok(abs(nf - pf) <= 0.25 * pf, f"finanziato {nf:,.0f} vs pubblicato {pf:,.0f}: variazione entro il 25%")
+tutte = glob.glob(os.path.join(SITE, "**", "*.html"), recursive=True)
+ok(len(glob.glob(os.path.join(SITE, "en", "progetti", "*.html"))) == len(per), "schede progetto in inglese = perimetro")
+mancano = 0
+for f in tutte:
+    t = open(f, encoding="utf-8").read()
+    en = os.sep + "en" + os.sep in f
+    frase = "Educational concept using official data. Not an institutional website." if en else "Concept a titolo didattico, con dati ufficiali. Non è un sito istituzionale."
+    firma = "By Prof. Giuseppe Bosi, Computer Science and Technology" if en else "A cura del Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche"
+    if not (frase in t and firma in t and 'class="fonte"' in t and "OpenCoesione" in t and 'class="lingua"' in t):
+        mancano += 1
+ok(mancano == 0, f"ogni pagina (IT e EN) ha fonte, data, frase del concept, firma e cambio lingua ({mancano} mancanti)")
 ok(not os.environ.get("OC_PROVA_FALLIMENTO"), "prova di fallimento richiesta (solo per collaudo)")
 print("ESITO:", "FALLITO" if errori else "PASSATO")
 sys.exit(1 if errori else 0)

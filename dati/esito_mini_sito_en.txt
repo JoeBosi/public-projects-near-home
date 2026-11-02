@@ -1,0 +1,7 @@
+Downloaded 26 pages, 12590 projects
+Funded: 357,478,579 EUR - Already paid: 291,577,787 EUR - Ongoing: 473
+Created site/index.html
+
+real	2m32.399s
+user	0m1.541s
+sys	0m0.390s

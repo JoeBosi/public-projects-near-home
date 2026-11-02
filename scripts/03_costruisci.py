@@ -284,19 +284,21 @@ def riga_progetto(d):
 
 # ------------------------------------------------------------------ home
 def home():
+    en = LANG == "en"
     per_tema = collections.defaultdict(lambda: [0, 0, 0])
     per_tema_op = collections.defaultdict(lambda: [0, 0, 0])
     for d in perim:
         t = per_tema_op if is_opera(d) else per_tema
         t[tema_s(d)][0] += fin(d); t[tema_s(d)][1] += pag(d); t[tema_s(d)][2] += 1
+    npj = lambda n: f"{n} project{'' if n == 1 else 's'}" if en else pl(n, "progetto", "progetti")
     def blocco(dic, titolo, nota):
         if not dic: return ""
         mx = max(v[0] for v in dic.values()) or 1
         righe = "".join(
-            f'<div class="riga"><strong>{esc(k)}</strong> <span class="mu small">({pl(v[2], "progetto", "progetti")})</span><br>'
-            f'<div class="bar" role="img" aria-label="Finanziato {eur(v[0])}"><i style="width:{max(1,v[0]/mx*100):.1f}%"></i></div>'
-            f'<div class="bar" style="margin-top:3px" role="img" aria-label="Pagato {eur(v[1])}"><i class="p" style="width:{max(0.5,v[1]/mx*100) if v[1] else 0:.1f}%"></i></div>'
-            f'<span class="small">Finanziato {eur(v[0])} · Già pagato {eur(v[1])}</span></div>'
+            f'<div class="riga"><strong>{lab(k, TEMI_EN)}</strong> <span class="mu small">({npj(v[2])})</span><br>'
+            f'<div class="bar" role="img" aria-label="{T("Finanziato", "Funded")} {eur(v[0])}"><i style="width:{max(1,v[0]/mx*100):.1f}%"></i></div>'
+            f'<div class="bar" style="margin-top:3px" role="img" aria-label="{T("Pagato", "Paid")} {eur(v[1])}"><i class="p" style="width:{max(0.5,v[1]/mx*100) if v[1] else 0:.1f}%"></i></div>'
+            f'<span class="small">{T("Finanziato", "Funded")} {eur(v[0])} · {T("Già pagato", "Already paid")} {eur(v[1])}</span></div>'
             for k, v in sorted(dic.items(), key=lambda kv: -kv[1][0]))
         return f"<h3>{titolo}</h3><p class='mu small'>{nota}</p>{righe}"
     op_n = sum(v[2] for v in per_tema_op.values())
@@ -305,23 +307,51 @@ def home():
         for e in set(enti(d)):
             ent[e][0] += fin(d); ent[e][1] += pag(d); ent[e][2] += 1
     top_ent = sorted(ent.items(), key=lambda kv: -kv[1][0])[:8]
-    ent_html = "".join(f'<li><strong>{esc(frase(k) if k.isupper() else k)}</strong><br>{pl(v[2], 'progetto', 'progetti')} · finanziato {eur(v[0])} · già pagato {eur(v[1])}</li>' for k, v in top_ent)
+    ent_html = "".join(f'<li><strong lang="it">{esc(frase(k) if k.isupper() else k)}</strong><br>{npj(v[2])} · {T("finanziato", "funded")} {eur(v[0])} · {T("già pagato", "already paid")} {eur(v[1])}</li>' for k, v in top_ent)
     corso_html = "".join(riga_progetto(d).replace("{R}", "") for d in corso[:10])
-    ope = [d for d in perim if is_opera(d)]
-    c = f"""
-<div class="hero"><h1>Quali progetti pubblici riguardano Arezzo?</h1>
-<p class="lead">Qui trovi i progetti del Comune di Arezzo finanziati con i fondi di coesione (risorse europee e nazionali per ridurre le differenze tra territori), con importi e stato presi dai dati ufficiali.</p>
-<form class="cerca" action="dati/" method="get" role="search"><input name="q" type="search" aria-label="Cerca un progetto" placeholder="Cerca: scuola, ponte, museo"><button type="submit">Cerca</button></form>
-<div class="passi"><a href="opere/#corso"><strong>Cosa si sta facendo adesso</strong>Progetti in corso, dal più grande</a><a href="opere/"><strong>Opere e progetti</strong>Tutto l'elenco, in parole semplici</a><a href="dati/"><strong>Tabella e file CSV</strong>Per filtrare e scaricare i dati</a></div></div>
-<p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l'opera. Possono non riflettere lo stato reale.</p>
+    mig = lambda n: format(n, ",") if en else format(n, ",").replace(",", ".")
+    ph = T("Cerca: scuola, ponte, museo", "Search (Italian words): scuola, ponte, museo")
+    if en:
+        c1 = f"""<h2>1. How much money do the main projects of Arezzo involve?</h2>
+<p>We count <strong>{npj(n_perim)}</strong>: all those ongoing or not yet started, and those concluded since 2016 that are public works or purchases or are worth at least €100,000. The two figures are different: the first is the sum <em>assigned</em>, the second the sum <em>already paid</em>.</p>
+<div class="cards">
+<div class="card fin"><div class="n">{eur(tot_fin)}</div><div><strong>Funded</strong>: public money assigned.</div></div>
+<div class="card pag"><div class="n">{eur(tot_pag)}</div><div><strong>Already paid</strong>: money actually paid out, according to the data.</div></div>
+</div>
+<p><strong>What is not counted.</strong> The data for Arezzo include another {mig(n_fuori)} projects, with {eur(fuori_fin)} funded and {eur(fuori_pag)} already paid: mostly small projects already concluded (training courses, grants to individuals), or concluded before 2016 or with no end date. With all projects together the total would be {eur(tot_lista)} funded and {eur(tot_lista_pag)} already paid. Details in <a href="metodo/">Method and sources</a>.</p>
 
-<h2>1. Quanti soldi riguardano i progetti principali di Arezzo?</h2>
+<h2>2. What for?</h2>
+<p>Projects are grouped by topic. <strong>Works and purchases</strong> ({npj(op_n)}) are kept apart from grants, incentives and services, which are far more numerous but smaller individually. The blue bar is the funded amount, the green one the amount already paid. Topic names are our own plain labels, with the Italian one in brackets.</p>
+{blocco(per_tema_op, "Works and purchases of goods", "Public works and purchases, for example roads, buildings, equipment.")}
+{blocco(per_tema, "Grants, incentives and services", "Support to businesses, bodies and people, training, services.")}
+
+<h2>3. What is being done now?</h2>
+<p>These are the ten projects with status «<span lang="it">In corso</span>» (ongoing) with the largest amounts. The end date is the one planned by the body, if it exists. The full list, with {npj(len(corso))} ongoing and {len(nonav)} not yet started, is on the <a href="opere/">Projects</a> page.</p>
+<ul class="lista">{corso_html}</ul>
+<p><a class="btn" href="opere/">See all projects</a></p>
+
+<h2>4. Who is in charge?</h2>
+<p>Each project has a responsible body (who carries it out or receives the funding). These are the eight bodies with the most funded resources. Names are official and stay in Italian.</p>
+<ul class="lista">{ent_html}</ul>
+
+<h2>Want to see the original data?</h2>
+<p>All the numbers above come from the public database OpenCoesione. In the <a href="guida/">Tutorial</a> you learn to read and download them yourself, and to <a href="guida/costruisci/">build a basic version of this website</a>. On the <a href="dati/">Full data</a> page you find all the columns and the file to open in a spreadsheet.</p>
+"""
+        top = f"""<div class="hero"><h1>Which public projects concern Arezzo?</h1>
+<p class="lead">Here you find the projects of the Municipality of Arezzo funded with cohesion funds (European and national resources meant to reduce differences between territories), with amounts and status taken from official data.</p>
+<p class="small mu"><strong>Language note.</strong> Project titles, descriptions and names of public bodies come from the official source and stay in Italian: they are not translated. The data are real; only the interface is translated.</p>
+<form class="cerca" action="dati/" method="get" role="search"><input name="q" type="search" aria-label="Search for a project" placeholder="{ph}"><button type="submit">Search</button></form>
+<div class="passi"><a href="opere/#corso"><strong>What is happening now</strong>Ongoing projects, largest first</a><a href="opere/"><strong>Projects</strong>The whole list</a><a href="dati/"><strong>Table and CSV file</strong>To filter and download the data</a></div></div>
+<p class="avv"><strong>Limit.</strong> The data tell how much money is assigned and paid, not how the work was carried out. They may not reflect the actual situation.</p>
+"""
+    else:
+        c1 = f"""<h2>1. Quanti soldi riguardano i progetti principali di Arezzo?</h2>
 <p>Contiamo <strong>{pl(n_perim, 'progetto', 'progetti')}</strong>: tutti quelli in corso o non ancora avviati e quelli conclusi dal 2016 che sono opere o valgono almeno 100.000 €. Le due cifre sono diverse: la prima è la somma <em>assegnata</em>, la seconda quella <em>già pagata</em>.</p>
 <div class="cards">
 <div class="card fin"><div class="n">{eur(tot_fin)}</div><div><strong>Finanziato</strong>: soldi pubblici assegnati.</div></div>
 <div class="card pag"><div class="n">{eur(tot_pag)}</div><div><strong>Già pagato</strong>: soldi usciti davvero, secondo i dati.</div></div>
 </div>
-<p><strong>Cosa non è contato.</strong> Nei dati di Arezzo ci sono altri {format(n_fuori, ",").replace(",", ".")} progetti, per {eur(fuori_fin)} finanziati e {eur(fuori_pag)} già pagati: per lo più piccoli progetti già conclusi (corsi, contributi alle persone), oppure conclusi prima del 2016 o senza data di fine. Con tutti i progetti insieme il totale sarebbe {eur(tot_lista)} finanziati e {eur(tot_lista_pag)} già pagati. Dettagli nel <a href="metodo/">Metodo e fonti</a>.</p>
+<p><strong>Cosa non è contato.</strong> Nei dati di Arezzo ci sono altri {mig(n_fuori)} progetti, per {eur(fuori_fin)} finanziati e {eur(fuori_pag)} già pagati: per lo più piccoli progetti già conclusi (corsi, contributi alle persone), oppure conclusi prima del 2016 o senza data di fine. Con tutti i progetti insieme il totale sarebbe {eur(tot_lista)} finanziati e {eur(tot_lista_pag)} già pagati. Dettagli nel <a href="metodo/">Metodo e fonti</a>.</p>
 
 <h2>2. Per fare cosa?</h2>
 <p>I progetti sono raggruppati per argomento. Le <strong>opere e gli acquisti</strong> ({pl(op_n, 'progetto', 'progetti')}) sono separati dai contributi, dagli incentivi e dai servizi, che sono molto più numerosi ma di importo singolo più piccolo. La barra blu è il finanziato, quella verde il già pagato.</p>
@@ -338,9 +368,15 @@ def home():
 <ul class="lista">{ent_html}</ul>
 
 <h2>Vuoi vedere i dati originali?</h2>
-<p>Tutti i numeri qui sopra vengono dalla banca dati pubblica OpenCoesione. Nella <a href="guida/">Guida agli open data</a> impari a leggerli e a scaricarli da solo. Nella pagina <a href="dati/">Dati completi</a> trovi tutte le colonne e il file da aprire in un foglio di calcolo.</p>
+<p>Tutti i numeri qui sopra vengono dalla banca dati pubblica OpenCoesione. Nel <a href="guida/">Tutorial</a> impari a leggerli e a scaricarli da solo, e a <a href="guida/costruisci/">costruire una versione base di questo sito</a>. Nella pagina <a href="dati/">Dati completi</a> trovi tutte le colonne e il file da aprire in un foglio di calcolo.</p>
 """
-    pagina("index.html", "Quali progetti pubblici riguardano Arezzo?", c, "home")
+        top = f"""<div class="hero"><h1>Quali progetti pubblici riguardano Arezzo?</h1>
+<p class="lead">Qui trovi i progetti del Comune di Arezzo finanziati con i fondi di coesione (risorse europee e nazionali per ridurre le differenze tra territori), con importi e stato presi dai dati ufficiali.</p>
+<form class="cerca" action="dati/" method="get" role="search"><input name="q" type="search" aria-label="Cerca un progetto" placeholder="{ph}"><button type="submit">Cerca</button></form>
+<div class="passi"><a href="opere/#corso"><strong>Cosa si sta facendo adesso</strong>Progetti in corso, dal più grande</a><a href="opere/"><strong>Opere e progetti</strong>Tutto l'elenco, in parole semplici</a><a href="dati/"><strong>Tabella e file CSV</strong>Per filtrare e scaricare i dati</a></div></div>
+<p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l'opera. Possono non riflettere lo stato reale.</p>
+"""
+    pagina("index.html", T("Quali progetti pubblici riguardano Arezzo?", "Which public projects concern Arezzo?"), top + c1, "home")
 
 # ------------------------------------------------------------------ elenco opere
 def elenco():
@@ -489,7 +525,7 @@ def metodo():
 <h2>Significato dei campi</h2>
 <ul><li><strong>Finanziato</strong>: campo <code>oc_finanz_tot_pub_netto</code>, finanziamento pubblico totale al netto delle economie, cioè dei risparmi già tolti.</li>
 <li><strong>Già pagato</strong>: campo <code>tot_pagamenti</code>, pagamenti totali registrati. Finanziato e pagato sono sempre mostrati separati e non vanno confusi: un progetto può avere pagato più o meno del finanziato.</li>
-<li><strong>Stato</strong>: campo <code>oc_stato_progetto</code>, riportato esattamente come dichiarato dalla fonte (In corso, Non avviato, Concluso, Liquidato, Non determinabile).</li>
+<li id="glossario"><strong>Stato</strong>: campo <code>oc_stato_progetto</code>, riportato esattamente come dichiarato dalla fonte (In corso, Non avviato, Concluso, Liquidato, Non determinabile).</li>
 <li><strong>Date</strong>: inizio, fine prevista e fine effettiva del progetto (campi <code>oc_data_inizio_progetto</code>, <code>oc_data_fine_progetto_prevista</code>, <code>oc_data_fine_progetto_effettiva</code>) sono quelle riferite all'intero progetto, comunicate dagli enti. La scheda ufficiale su OpenCoesione mostra invece, in alto, le date dell'esecuzione dei lavori, che possono differire (controllo fatto a mano su tre progetti: pagamenti identici, date di fine diverse per questo motivo). Le date di ogni fase sono riportate nelle schede. Se una data manca, il sito scrive «dato non disponibile».</li>
 <li><strong>Argomento</strong>: tema sintetico di OpenCoesione, con nomi più brevi (per esempio «Trasporti e mobilità» diventa «Strade e trasporti»).</li>
 <li><strong>Opere e acquisti</strong>: progetti con natura CUP «Realizzazione di lavori pubblici» o «Acquisto di beni». Tutto il resto è «contributi, incentivi e servizi».</li></ul>
@@ -522,7 +558,8 @@ def guida():
     det_corto = {k: es_det[k] for k in ("cod_locale_progetto", "cup", "oc_titolo_progetto", "oc_finanz_tot_pub_netto", "tot_pagamenti", "oc_stato_progetto", "oc_data_inizio_progetto", "oc_data_fine_progetto_effettiva")}
     B = "https://opencoesione.gov.it/it/api"
     u2 = B + "/progetti/?format=json&territorio=arezzo-comune&page_size=2"
-    c = f"""<h1>Guida agli open data</h1>
+    c = f"""<h1>Tutorial: guida agli open data</h1>
+<p><a class="btn pri" href="costruisci/" style="text-decoration:none">Costruisci una versione base del sito, passo passo</a></p>
 <p class="lead">Una guida per chi parte da zero. Ogni esempio è stato eseguito davvero sui dati di Arezzo il giorno in cui è stato scritto questo sito; i numeri che vedi sono quelli reali.</p>
 <p class="data">Esempi eseguiti sui dati al {DATA_DATI}</p>
 <nav aria-label="Indice" class="small"><a href="#cosa">1. Cosa sono</a> · <a href="#dove">2. Dove si trovano</a> · <a href="#licenze">3. Licenze</a> · <a href="#api">4. Cos'è una API</a> · <a href="#json">5. Leggere il JSON</a> · <a href="#param">6. Parametri</a> · <a href="#pagine">7. Paginazione</a> · <a href="#csv">8. CSV nel foglio di calcolo</a> · <a href="#soldi">9. Finanziato e pagato</a> · <a href="#verifica">10. Verificare un dato</a> · <a href="#python">11. Python (facoltativo)</a></nav>
@@ -587,9 +624,204 @@ for p in dati["results"]:
 <p class="small mu">Quando scarichi molte pagine, aspetta almeno un secondo tra una richiesta e l'altra e salva le risposte sul tuo computer per non ripeterle.</p>"""
     pagina("guida/index.html", "Guida agli open data", c, "guida", profondita=1)
 
+# ------------------------------------------------------------------ inglese: metodo e guida
+def metodo_en():
+    c = f"""<h1>Method and sources</h1>
+<p class="data">Data updated to {DATA_ISO}</p>
+<p class="small mu"><strong>Language note.</strong> This page is the English version. Project titles, descriptions, topics, statuses and body names come from the official source and stay in Italian; they are never translated on this site.</p>
+<h2>Source</h2>
+<p>All projects come from the public API of <a href="https://opencoesione.gov.it/it/api/">OpenCoesione</a>, the official Italian portal on projects funded by cohesion policy, run with the State General Accounting Department. Licence: <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0</a> (reuse is allowed if you credit the source). Update date declared by the API: {DATA_ISO}. We use no other source for projects.</p>
+<h2>What we took</h2>
+<p>The projects located in the Municipality of Arezzo (parameter <code>territorio=arezzo-comune</code>): {n_lista} in total, from the 2000-2006 programming cycle onwards. We show those that fall in the perimeter below.</p>
+<h2>Perimeter: what is counted and what is not</h2>
+<p><strong>Counted ({n_perim} projects, {eur(tot_fin)} funded, {eur(tot_pag)} already paid):</strong></p>
+<ul><li>all projects with status «In corso» (ongoing) or «Non avviato» (not started);</li>
+<li>projects «Concluso», «Liquidato» or «Non determinabile» with an actual end date from 1 January 2016, but only if they are works (public works or purchase of goods) or have funding of at least €100,000. The project end date may differ from the one on the official page (which often shows the end of works), so the 2016 boundary is meant «according to the project field».</li></ul>
+<p><strong>Not counted ({format(n_fuori, ",")} projects, {eur(fuori_fin)} funded, {eur(fuori_pag)} already paid):</strong></p>
+<ul><li><strong>{format(non_esaminati, ",")}</strong> concluded projects, under €100,000 and not works (mostly training courses, vouchers and individual grants). To respect the API's rate limits we did not download their detail, so we do not know their end date: their sum comes from the OpenCoesione list.</li>
+<li><strong>{len(senza_data)}</strong> projects, among those downloaded, concluded with no actual end date.</li>
+<li><strong>{len(prima_2016)}</strong> projects, among those downloaded, with an actual end before 2016.</li></ul>
+<p>Total of all projects of Arezzo in the database: {n_lista} projects, {eur(tot_lista)} funded, {eur(tot_lista_pag)} already paid. Counted and not counted add up to this total. For the counted projects, the totals computed from the detail records match those taken from the list (automatic check at every build). Funded and paid cannot be compared project by project: in some cases the paid amount exceeds the net funded amount.</p>
+<h2>Meaning of the fields</h2>
+<ul><li><strong>Funded</strong>: field <code>oc_finanz_tot_pub_netto</code>, total public funding net of savings (amounts already deducted).</li>
+<li><strong>Already paid</strong>: field <code>tot_pagamenti</code>, total payments recorded. Funded and paid are always shown separately and must not be confused.</li>
+<li><strong>Status</strong>: field <code>oc_stato_progetto</code>, reported exactly as declared by the source.</li>
+<li><strong>Dates</strong>: start, planned end and actual end of the project (fields <code>oc_data_inizio_progetto</code>, <code>oc_data_fine_progetto_prevista</code>, <code>oc_data_fine_progetto_effettiva</code>) refer to the whole project, as reported by the bodies. The official OpenCoesione page shows, at the top, the dates of the execution of works, which can differ (hand check on three projects: identical payments, different end dates for this reason). If a date is missing the site writes «not available».</li>
+<li><strong>Topic</strong>: OpenCoesione's synthetic theme, with shorter plain names on the home page.</li>
+<li><strong>Works and purchases</strong>: projects whose CUP nature is «Realizzazione di lavori pubblici» (public works) or «Acquisto di beni» (purchase of goods). Everything else is «grants, incentives and services».</li></ul>
+<h2 id="glossario">Glossary of status values (Italian to English)</h2>
+<p>These are the only status values that appear in the data. We keep the Italian word on the site because it is the value declared by the source; the English meaning is given here as a help.</p>
+<ul><li><span lang="it">In corso</span>: ongoing</li><li><span lang="it">Non avviato</span>: not started</li><li><span lang="it">Concluso</span>: concluded</li><li><span lang="it">Liquidato</span>: settled (payments completed)</li><li><span lang="it">Non determinabile</span>: not determinable (the source could not determine the status)</li></ul>
+<h2>Labels</h2>
+<p>For projects with status «In corso» or «Non avviato», with a planned end date earlier than the data date and no actual end date, the site writes «deadline passed according to the data». It is a comparison between two dates of the source, not a judgement.</p>
+<h2>Rewritten titles</h2>
+<p>Some titles, originally technical or in capitals, are rewritten in plain Italian with an artificial intelligence (AI) assistant, only from the official title and summary and without adding information. The original title is always shown beside it. Capitalised titles that are not rewritten are shown with only the first letter in capitals. New projects keep the official title until they are simplified.</p>
+<h2>Rounding</h2>
+<p>Amounts are shown in whole euros, rounded; sums are computed on the original values and then rounded, so the sum of the figures shown may differ by a few euros.</p>
+<h2>Limits</h2>
+<ul><li>The site shows projects by municipality, not by address: the source gives no coordinates.</li>
+<li>Projects located in several territories also appear in those: amounts are not split between municipalities.</li>
+<li>There is no comparison with other municipalities: it would need the same perimeter and verified demographic data.</li>
+<li>In titles of individual interventions in favour of natural persons the name is omitted from the site («[nome omesso]»), even if present in the source.</li>
+<li>Some texts of the source contain characters replaced by «?» (for example apostrophes and accents): they are in the original data.</li></ul>
+<h2>How to check</h2>
+<p>Every project page has a link to the official page and a link to the exact API response. See the <a href="../guida/">Tutorial</a>.</p>"""
+    pagina("metodo/index.html", "Method and sources", c, "metodo", profondita=1)
+
+def guida_en():
+    es_idx = api.get(api.BASE + "/")
+    es_due = api.get(api.BASE + "/progetti/?format=json&territorio=arezzo-comune&page_size=2")
+    es_corso = api.get(api.BASE + "/progetti/?format=json&territorio=arezzo-comune&stato=in_corso&page_size=1")
+    es_p2 = api.get(api.BASE + "/progetti/?format=json&territorio=arezzo-comune&page_size=2&page=2")
+    es_det = api.get(es_due["results"][0]["url"])
+    tronca = lambda o: json.dumps(o, ensure_ascii=False, indent=2)
+    r0 = es_due["results"][0]
+    esempio_corto = {k: r0[k] for k in ("cod_locale_progetto", "cup", "oc_titolo_progetto", "oc_finanz_tot_pub_netto", "tot_pagamenti", "oc_stato_progetto")}
+    det_corto = {k: es_det[k] for k in ("cod_locale_progetto", "cup", "oc_titolo_progetto", "oc_finanz_tot_pub_netto", "tot_pagamenti", "oc_stato_progetto", "oc_data_inizio_progetto", "oc_data_fine_progetto_effettiva")}
+    B = "https://opencoesione.gov.it/it/api"
+    u2 = B + "/progetti/?format=json&territorio=arezzo-comune&page_size=2"
+    c = f"""<h1>Tutorial: open data</h1>
+<p class="lead">A guide for those starting from zero. Every example was really run on the data of Arezzo; the numbers you see are the real ones. The data fields and project titles are in Italian, as in the source.</p>
+<p><a class="btn pri" href="costruisci/" style="text-decoration:none">Build a basic version of this website, step by step</a></p>
+<p class="data">Examples run on data updated to {DATA_ISO}</p>
+<nav aria-label="Index" class="small"><a href="#cosa">1. What they are</a> · <a href="#dove">2. Where to find them</a> · <a href="#licenze">3. Licences</a> · <a href="#api">4. What an API is</a> · <a href="#json">5. Reading JSON</a> · <a href="#param">6. Parameters</a> · <a href="#pagine">7. Pagination</a> · <a href="#csv">8. CSV in a spreadsheet</a> · <a href="#soldi">9. Funded and paid</a> · <a href="#verifica">10. Checking a figure</a> · <a href="#python">11. Python (optional)</a></nav>
+
+<h2 id="cosa">1. What open data are</h2>
+<p><strong>Open data</strong> are public information that anyone can download, check and reuse, in a format a computer can read. An example: the list of projects funded with public money, with amounts and dates. Open means you do not need to ask permission and you do not pay.</p>
+<h2 id="dove">2. Where to find them</h2>
+<p>Every public administration can publish them. Some starting points: <a href="https://www.dati.gov.it/">dati.gov.it</a> (the Italian national catalogue) and <a href="https://opencoesione.gov.it/it/opendata/">OpenCoesione</a>, the source of this site. OpenCoesione offers two ways: whole files to download (for example the list of all projects, in a compressed archive) and an <strong>API</strong>, a service to ask only for the data you need.</p>
+<h2 id="licenze">3. Licences</h2>
+<p>Open data come with a licence that says what you may do with them. OpenCoesione data use the <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> licence (Creative Commons Attribution): you can copy and modify them, even for commercial use, as long as you <strong>credit the source</strong>. For example: «Source: OpenCoesione, data updated to {DATA_ISO}».</p>
+<h2 id="api">4. What an API is, with a real example</h2>
+<p>An <strong>API</strong> (application programming interface) is a web address that, instead of a page to read, returns data. You need to install nothing: the browser is enough. Open this address:</p>
+<pre><code>{B}/</code></pre>
+<p><a class="btn" href="{B}/">Open in the browser</a></p>
+<p>You will see a list of «sections» of the database. This is the answer we got:</p>
+<pre><code>{esc(tronca(es_idx))}</code></pre>
+<p>Each entry is another address. We will use <code>progetti</code> (projects).</p>
+<h2 id="json">5. Reading JSON</h2>
+<p>Data arrive in <strong>JSON</strong> format: text with «name: value» pairs between curly brackets. Open the address below (it asks for the projects of the Municipality of Arezzo, only two of them):</p>
+<pre><code>{u2}</code></pre>
+<p><a class="btn" href="{u2}">Open in the browser</a></p>
+<p>The number <code>count</code> is the total of projects found: <strong>{es_due['count']}</strong>. The first result, reduced to the main fields, is:</p>
+<pre><code>{esc(tronca(esempio_corto))}</code></pre>
+<p>Read it like this: <code>oc_finanz_tot_pub_netto</code> is the <em>funded</em> amount, <code>tot_pagamenti</code> is the <em>paid</em> amount, <code>oc_stato_progetto</code> is the status. Amounts use a comma as decimal separator and are written as text.</p>
+<h2 id="param">6. Parameters: ask only for what you need</h2>
+<p>After the question mark come the <strong>parameters</strong>, separated by <code>&amp;</code>:</p>
+<ul><li><code>format=json</code>: the format of the answer;</li><li><code>territorio=arezzo-comune</code>: the municipality;</li><li><code>page_size=2</code>: how many results at a time;</li><li><code>stato=in_corso</code>: only ongoing projects.</li></ul>
+<p>Adding <code>stato=in_corso</code> the total becomes <strong>{es_corso['count']}</strong>:</p>
+<pre><code>{B}/progetti/?format=json&amp;territorio=arezzo-comune&amp;stato=in_corso&amp;page_size=1</code></pre>
+<p><a class="btn" href="{B}/progetti/?format=json&amp;territorio=arezzo-comune&amp;stato=in_corso&amp;page_size=1">Open in the browser</a></p>
+<h2 id="pagine">7. Pagination</h2>
+<p>With thousands of results the API delivers them in groups, the <strong>pages</strong>. In the answer you find <code>current_page</code> (current page: {es_due['current_page']}), <code>last_page</code> (last: {es_due['last_page']}) and <code>next</code>, the address of the next page. To go to page 2 add <code>page=2</code>:</p>
+<pre><code>{u2}&amp;page=2</code></pre>
+<p><a class="btn" href="{u2}&amp;page=2">Open in the browser</a></p>
+<p>The first project on page 2 is «<span lang="it">{esc(frase(es_p2['results'][0]['oc_titolo_progetto']))}</span>». To download everything you keep going until <code>next</code> is empty, waiting a second between requests so as not to overload the service.</p>
+<h2 id="csv">8. CSV in a spreadsheet</h2>
+<p>A <strong>CSV</strong> is a table in a text file, with columns separated by commas. It opens with Excel, LibreOffice or Google Sheets. The OpenCoesione API answers only in JSON, so we converted this site's projects to CSV ourselves: <a href="../../dati/progetti-arezzo.csv" download>download progetti-arezzo.csv</a> ({n_perim} rows; column names and values are in Italian). For the whole files, already in CSV, see the <a href="https://opencoesione.gov.it/it/opendata/">OpenCoesione downloads page</a>.</p>
+<ol><li>Download the file.</li><li>In LibreOffice: «File → Open», choose the file, in the import window keep «Unicode (UTF-8)» and separator «Comma». In Excel: «Data → From Text/CSV». In Google Sheets: «File → Import → Upload».</li><li>To filter: select the header row and turn on the autofilter (the «Data» menu). Choose for example <code>stato</code> equal to «In corso».</li><li>To sum: select the <code>finanziato_euro</code> column and read the sum at the bottom. Do the same with <code>pagato_euro</code>: they are two different totals.</li></ol>
+<h2 id="soldi">9. Funded amount and payments</h2>
+<p>The <strong>funded</strong> amount is the sum assigned to the project; the <strong>paid</strong> amount is what was actually paid out. In the project «<span lang="it">{esc(frase(es_det['oc_titolo_progetto']))}</span>» (CUP {esc(es_det['cup'])}) the funded amount is {eur(num(es_det['oc_finanz_tot_pub_netto']))} and the paid amount is {eur(num(es_det['tot_pagamenti']))}. In other projects the two figures differ: that is why the site never adds them together or mixes them up.</p>
+<h2>Looking up a CUP</h2>
+<p>The <strong>CUP</strong> (Codice Unico di Progetto, Unique Project Code) is the «tax code» of a public project: it identifies the same project in different databases. Every project page of this site shows it, and in the <a href="../dati/">Full data</a> table you can type a CUP in the «Search» field.</p>
+<h2 id="verifica">10. How to check a figure</h2>
+<ol><li>Open the project page on this site.</li><li>Press «Official page on OpenCoesione» and compare amounts and status.</li><li>Press «See where this data comes from»: it is the API's JSON. Look for <code>oc_finanz_tot_pub_netto</code> and <code>tot_pagamenti</code>.</li></ol>
+<p>Detail of one project, reduced to the main fields ({esc(es_due['results'][0]['url'])}):</p>
+<pre><code>{esc(tronca(det_corto))}</code></pre>
+<p>Dates are written as year, month, day without separators: <code>20220629</code> means 2022-06-29.</p>
+<h2 id="python">11. First steps with Python (optional)</h2>
+<p>If you want to automate, here is a program of a few lines that uses only Python's standard library (install it from <a href="https://www.python.org/">python.org</a>). Save it as <code>projects.py</code> and run it with <code>python projects.py</code>:</p>
+<pre><code>import json, urllib.request
+
+url = "{u2}"
+with urllib.request.urlopen(url) as response:
+    data = json.load(response)
+
+print("Projects found:", data["count"])
+for p in data["results"]:
+    print(p["cup"], p["oc_stato_progetto"], p["oc_finanz_tot_pub_netto"], p["tot_pagamenti"])</code></pre>
+<p>Result obtained by running it:</p>
+<pre><code>Projects found: {es_due['count']}
+{chr(10).join(f"{p['cup']} {p['oc_stato_progetto']} {p['oc_finanz_tot_pub_netto']} {p['tot_pagamenti']}" for p in es_due['results'])}</code></pre>
+<p class="small mu">When you download many pages, wait at least a second between requests and save the answers on your computer so as not to repeat them.</p>"""
+    pagina("guida/index.html", "Tutorial: open data", c, "guida", profondita=1)
+
+# ------------------------------------------------------------------ parte didattica: costruisci una versione base
+def costruisci():
+    en = LANG == "en"
+    src = open(os.path.join(ROOT, "esempi", "mini-site.py" if en else "mini-sito.py"), encoding="utf-8").read()
+    esito = open(os.path.join(ROOT, "dati", "esito_mini_sito_en.txt" if en else "esito_mini_sito_it.txt"), encoding="utf-8").read().strip()
+    nome = "mini-site.py" if en else "mini-sito.py"
+    out = os.path.join(SITE, "en" if en else "", "guida", "costruisci"); os.makedirs(out, exist_ok=True)
+    open(os.path.join(out, nome), "w", encoding="utf-8").write(src)
+    if en:
+        c = f"""<p><a href="../">← Tutorial</a></p>
+<h1>Build a basic version of this website, step by step</h1>
+<p class="lead">In about fifteen minutes you build a small web page that downloads the projects of a municipality from OpenCoesione, adds up funded and paid amounts and lists the largest ongoing projects. It is a rough, working version of this site, not a copy of it.</p>
+<p class="small mu">Project titles are in Italian, as in the source. We really ran every step below from an empty folder; the result is declared at the end.</p>
+<h2>What you will get</h2>
+<p>One page, <code>site/index.html</code>, with: total funded and total paid for all projects of the municipality (shown separately), the 15 largest ongoing projects, the source with its licence and the download date.</p>
+<h2>What you need</h2>
+<ul><li>Python 3 (version 3.8 or newer; we used 3.12). Check with <code>python3 --version</code> (on Windows: <code>python --version</code>). If it is missing, install it from <a href="https://www.python.org/">python.org</a>.</li><li>A terminal (Terminal on Mac and Linux, PowerShell on Windows) and a web browser.</li><li>An internet connection. Nothing else to install: the program uses only Python's standard library.</li></ul>
+<h2>Step 1. Create an empty folder</h2>
+<pre><code>mkdir mini-site
+cd mini-site</code></pre>
+<h2>Step 2. Save the program</h2>
+<p>Create a file called <code>build.py</code> in that folder and paste the code below, or <a href="{nome}" download>download it</a> and rename it. Read it first: the comments explain each part.</p>
+<pre><code>{esc(src)}</code></pre>
+<h2>Step 3. Run it</h2>
+<pre><code>python3 build.py</code></pre>
+<p>The program downloads 26 pages of 500 projects, waiting a second between requests, and it keeps every page in the <code>cache</code> folder: if it stops, run it again and it resumes. It takes about three minutes. This is what we obtained:</p>
+<pre><code>{esc(esito.splitlines()[0])}
+{esc(esito.splitlines()[1])}
+{esc(esito.splitlines()[2])}</code></pre>
+<h2>Step 4. Look at the result</h2>
+<pre><code>python3 -m http.server 8000 --directory site</code></pre>
+<p>Open <code>http://localhost:8000</code> in the browser. To stop the server press Ctrl+C. The two big figures are the same ones you can read on the <a href="../../">home page</a> for all 12,590 projects of Arezzo (the home page counts a narrower perimeter, explained in <a href="../../metodo/">Method and sources</a>).</p>
+<h2>How it works, in four parts</h2>
+<ol><li><strong>Download with a pause and a memory</strong>: <code>download()</code> asks one page at a time, waits a second, waits longer and retries if the service answers 429 («too many requests»), and saves each answer in <code>cache</code>.</li><li><strong>Pagination</strong>: the loop continues until <code>last_page</code>, as explained in the <a href="../#pagine">tutorial</a>.</li><li><strong>Sums</strong>: amounts are text with a comma, so <code>euro()</code> turns <code>"51817680,65"</code> into a number. Funded and paid are summed separately.</li><li><strong>The page</strong>: a text template with the figures and a table; <code>html.escape</code> protects the page from special characters in titles.</li></ol>
+<h2>Next steps</h2>
+<ul><li>Change <code>COMUNE</code> to another municipality: the codes are listed in the API's <a href="https://opencoesione.gov.it/it/api/territori/">territories section</a>.</li><li>Add a column with the status, or a link to each project's official page (<code>oc_link</code> field).</li><li>Publish: the <code>site</code> folder is a normal static website; copy it to any static hosting.</li><li>Look at how this full site is built: the code is in the project repository and the pages are generated by a script.</li></ul>
+<h2>Outcome of our test</h2>
+<p>Run on 2 November 2026 from an empty folder, with Python 3.12.3 on Linux, following exactly the steps above. The <strong>first attempt failed</strong>: the service answered 429 partway through the download, because the one-second pause was not enough. We added the wait-and-retry you see in the code, repeated the test from an empty folder and it completed in 3 minutes 32 seconds (English version: 2 minutes 32 seconds). The totals match the full list of the Arezzo projects used by this site. Not tested: Windows and macOS, other Python versions, other municipalities.</p>"""
+        titolo = "Build a basic version of this website"
+    else:
+        c = f"""<p><a href="../">← Tutorial</a></p>
+<h1>Costruisci una versione base di questo sito, passo passo</h1>
+<p class="lead">In un quarto d'ora crei una piccola pagina web che scarica da OpenCoesione i progetti di un Comune, somma finanziato e pagato e elenca i progetti in corso più grandi. È una versione di massima ma funzionante di questo sito, non una copia.</p>
+<p class="small mu">Ogni passo qui sotto è stato eseguito davvero partendo da una cartella vuota; l'esito è dichiarato in fondo.</p>
+<h2>Cosa ottieni</h2>
+<p>Una pagina, <code>sito/index.html</code>, con: totale finanziato e totale pagato di tutti i progetti del Comune (separati), i 15 progetti in corso più grandi, la fonte con la licenza e la data di scarico.</p>
+<h2>Cosa ti serve</h2>
+<ul><li>Python 3 (versione 3.8 o successiva; noi abbiamo usato la 3.12). Controlla con <code>python3 --version</code> (su Windows: <code>python --version</code>). Se manca, installalo da <a href="https://www.python.org/">python.org</a>.</li><li>Un terminale (Terminale su Mac e Linux, PowerShell su Windows) e un browser.</li><li>Una connessione a internet. Non devi installare altro: il programma usa solo la libreria standard di Python.</li></ul>
+<h2>Passo 1. Crea una cartella vuota</h2>
+<pre><code>mkdir mini-sito
+cd mini-sito</code></pre>
+<h2>Passo 2. Salva il programma</h2>
+<p>Crea in quella cartella un file chiamato <code>costruisci.py</code> e incolla il codice qui sotto, oppure <a href="{nome}" download>scaricalo</a> e rinominalo. Leggilo prima: i commenti spiegano ogni parte.</p>
+<pre><code>{esc(src)}</code></pre>
+<h2>Passo 3. Eseguilo</h2>
+<pre><code>python3 costruisci.py</code></pre>
+<p>Il programma scarica 26 pagine da 500 progetti, aspettando un secondo tra una richiesta e l'altra, e conserva ogni pagina nella cartella <code>cache</code>: se si ferma, rilancialo e riparte da dove era arrivato. Richiede circa tre minuti. Ecco cosa abbiamo ottenuto:</p>
+<pre><code>{esc(esito.splitlines()[0])}
+{esc(esito.splitlines()[1])}
+{esc(esito.splitlines()[2])}</code></pre>
+<h2>Passo 4. Guarda il risultato</h2>
+<pre><code>python3 -m http.server 8000 --directory sito</code></pre>
+<p>Apri <code>http://localhost:8000</code> nel browser. Per fermare il server premi Ctrl+C. Le due cifre grandi sono quelle della <a href="../../">prima pagina</a> riferite a tutti i 12.590 progetti di Arezzo (la prima pagina conta un perimetro più ristretto, spiegato nel <a href="../../metodo/">Metodo e fonti</a>).</p>
+<h2>Come funziona, in quattro parti</h2>
+<ol><li><strong>Scarico con pausa e memoria</strong>: <code>scarica()</code> chiede una pagina per volta, aspetta un secondo, aspetta di più e riprova se il servizio risponde 429 («troppe richieste»), e salva ogni risposta in <code>cache</code>.</li><li><strong>Paginazione</strong>: il ciclo continua fino a <code>last_page</code>, come spiegato nel <a href="../#pagine">tutorial</a>.</li><li><strong>Somme</strong>: gli importi sono testo con la virgola, quindi <code>euro()</code> trasforma <code>"51817680,65"</code> in un numero. Finanziato e pagato sono sommati separatamente.</li><li><strong>La pagina</strong>: un modello di testo con le cifre e una tabella; <code>html.escape</code> protegge la pagina dai caratteri speciali nei titoli.</li></ol>
+<h2>E poi</h2>
+<ul><li>Cambia <code>COMUNE</code> con un altro Comune: i codici sono nella <a href="https://opencoesione.gov.it/it/api/territori/">sezione territori</a> della API.</li><li>Aggiungi una colonna con lo stato o un link alla scheda ufficiale di ogni progetto (campo <code>oc_link</code>).</li><li>Pubblica: la cartella <code>sito</code> è un normale sito statico; copiala su un qualsiasi servizio di hosting statico.</li><li>Guarda come è fatto questo sito completo: il codice è nel repository del progetto e le pagine sono generate da uno script.</li></ul>
+<h2>Esito della nostra prova</h2>
+<p>Eseguito il 2 novembre 2026 da una cartella vuota, con Python 3.12.3 su Linux, seguendo esattamente i passi qui sopra. Il <strong>primo tentativo è fallito</strong>: il servizio ha risposto 429 a metà scarico, perché la pausa di un secondo non bastava. Abbiamo aggiunto l'attesa con nuovi tentativi che vedi nel codice, ripetuto la prova da una cartella vuota ed è arrivata in fondo in 3 minuti e 32 secondi. I totali coincidono con quelli della lista completa dei progetti di Arezzo usata da questo sito. Non provato: Windows e macOS, altre versioni di Python, altri Comuni.</p>"""
+        titolo = "Costruisci una versione base del sito"
+    pagina("guida/costruisci/index.html", titolo, c, "guida", profondita=2)
+
 # ------------------------------------------------------------------ robots, sitemap, main
 def varie():
-    urls = ["", "opere/", "dati/", "guida/", "metodo/"] + [f"progetti/{slug(d)}.html" for d in perim]
+    base = ["", "opere/", "dati/", "guida/", "guida/costruisci/", "metodo/"] + [f"progetti/{slug(d)}.html" for d in perim]
+    urls = base + ["en/" + u for u in base]
     sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{SITO}/{u}</loc></url>\n" for u in urls) + "</urlset>\n"
     open(os.path.join(SITE, "sitemap.xml"), "w").write(sm)
     open(os.path.join(SITE, "robots.txt"), "w").write(f"User-agent: *\nAllow: /\nSitemap: {SITO}/sitemap.xml\n")
@@ -599,9 +831,15 @@ if __name__ == "__main__":
     shutil.rmtree(SITE, ignore_errors=True)
     os.makedirs(SITE)
     open(os.path.join(SITE, "stile.css"), "w").write(CSS)
-    home(); elenco(); dati_completi(); metodo(); guida(); varie()
-    for d in perim:
-        scheda(d)
+    for LANG in ("it", "en"):
+        home(); elenco(); dati_completi()
+        (metodo_en if LANG == "en" else metodo)()
+        (guida_en if LANG == "en" else guida)()
+        costruisci()
+        for d in perim:
+            scheda(d)
+    LANG = "it"
+    varie()
     # report per l'aggiornamento: titoli ancora ufficiali tra i progetti che dovrebbero averlo semplice
     prior = [d for d in perim if d["oc_stato_progetto"] in ("In corso", "Non avviato") or is_opera(d)]
     senza = [d["cod_locale_progetto"] for d in prior if d["cod_locale_progetto"] not in semplici]

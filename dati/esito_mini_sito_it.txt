@@ -1,0 +1,7 @@
+Scaricate 26 pagine, 12590 progetti
+Finanziato: 357.478.579 € - Già pagato: 291.577.787 € - In corso: 473
+Creato sito/index.html
+
+real	3m32.381s
+user	0m1.585s
+sys	0m0.330s
