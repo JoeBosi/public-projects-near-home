@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import api
 SITE = os.path.join(ROOT, "site")
 SITO = "https://opendata.giuseppebosi.com"
-DATA_DATI = "30/06/2026"
+DATA_DATI = None  # calcolata dai dati in carica()
 SOGLIA = "20160101"
 
 num = lambda s: float((s or "0").replace(".", "").replace(",", ".")) if isinstance(s, str) else float(s or 0)
@@ -119,7 +119,7 @@ main p,main li,main dd,main h1,main h2,main h3{overflow-wrap:anywhere}
 a{color:var(--ac)}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
 .w{max-width:960px;margin:0 auto;padding:0 16px}
 header.top{border-bottom:1px solid var(--l);background:var(--sf)}
-header.top .w{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;padding:10px 16px}
+header.top .w.nav{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;padding:10px 16px}header.top .fonte{background:#0b3d6e;color:#fff;font-size:.88rem;padding:5px 0}header.top .fonte a{color:#fff}
 header.top b{font-size:1.05rem}nav{display:flex;flex-wrap:wrap;gap:4px 18px}nav a{text-decoration:none;padding:4px 0}nav a.on{border-bottom:3px solid var(--ac);font-weight:600}
 h1{font-size:2rem;line-height:1.2;margin:1.2rem 0 .6rem}h2{font-size:1.4rem;margin:2.2rem 0 .6rem}h3{font-size:1.1rem;margin:1.4rem 0 .4rem}
 .lead{font-size:1.2rem;color:var(--tx)}.mu{color:var(--mu)}.small{font-size:.9rem}
@@ -137,6 +137,15 @@ dl.sch{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:6px 16px}d
 pre{background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:12px;overflow-x:auto;font-size:.85rem;line-height:1.45}code{font-family:ui-monospace,Menlo,Consolas,monospace}
 .tag{display:inline-block;border:1px solid var(--l);border-radius:6px;padding:0 8px;font-size:.85rem;background:var(--sf)}
 .filtri{display:flex;flex-wrap:wrap;gap:10px;margin:.8rem 0}.filtri input,.filtri select{font:inherit;padding:8px;border:1px solid var(--l);border-radius:8px;max-width:100%}
+
+.hero{background:var(--sf);border:1px solid var(--l);border-radius:14px;padding:18px 18px 14px;margin:1rem 0 1.4rem}
+.hero h1{margin-top:0}.cerca{display:flex;flex-wrap:wrap;gap:8px;margin:.8rem 0}.cerca input{flex:1 1 240px;font:inherit;padding:12px;border:2px solid var(--ac);border-radius:10px}
+.cerca button,.btn.pri{font:inherit;background:var(--ac);color:#fff;border:2px solid var(--ac);border-radius:10px;padding:12px 18px;cursor:pointer;font-weight:600}
+.passi{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:.6rem 0 0}
+.passi a{display:block;border:1px solid var(--l);background:#fff;border-radius:10px;padding:10px 14px;text-decoration:none;color:var(--tx)}.passi a strong{display:block;color:var(--ac)}
+.vuoto{border:1px dashed var(--mu);border-radius:10px;padding:14px;margin:.8rem 0;background:var(--sf)}
+.stati{display:flex;flex-wrap:wrap;gap:8px;margin:.4rem 0 1rem}.stati .tag{font-size:.95rem;padding:2px 10px}
+.tag.st{background:#e6f0fb;border-color:#9bbfe6;font-weight:600}
 footer{border-top:1px solid var(--l);background:var(--sf);margin-top:3rem;padding:18px 0;font-size:.92rem}
 @media(max-width:600px){body{font-size:17px}h1{font-size:1.65rem}dl.sch{grid-template-columns:1fr}dl.sch dt{margin-top:6px}}
 """
@@ -151,10 +160,10 @@ def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
 <title>{esc(titolo)} | Progetti pubblici sotto casa</title>
 <meta name="description" content="{esc(descr or 'I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.')}">
 <link rel="stylesheet" href="{rel}stile.css"></head><body>
-<header class="top"><div class="w"><b><a href="{rel}" style="text-decoration:none;color:inherit">Progetti pubblici sotto casa</a></b><nav aria-label="Principale">{n}</nav></div></header>
+<header class="top"><div class="fonte"><div class="w">Fonte: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · ultimo aggiornamento dei dati: <strong>{DATA_DATI}</strong></div></div><div class="w nav"><b><a href="{rel}" style="text-decoration:none;color:inherit">Progetti pubblici sotto casa</a></b><nav aria-label="Principale">{n}</nav></div></header>
 <main class="w">{corpo}</main>
 <footer><div class="w"><p>I dati provengono da <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licenza <a href="https://creativecommons.org/licenses/by/4.0/deed.it">CC BY 4.0</a>) e possono non riflettere lo stato reale: sono quelli comunicati dagli enti. Per segnalare un errore scrivi a <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Dati aggiornati al {DATA_DATI}.</p>
-<p>A cura di Giuseppe Bosi, Dottore in Ingegneria Elettronica — <a href="https://www.giuseppebosi.com">www.giuseppebosi.com</a></p></div></footer>
+<p>A cura del Prof. Giuseppe Bosi, Professore di Scienze e Tecnologie Informatiche — <a href="https://www.giuseppebosi.com">www.giuseppebosi.com</a></p></div></footer>
 </body></html>"""
     p = os.path.join(SITE, percorso)
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -173,6 +182,8 @@ def slug(d):
 
 # ------------------------------------------------------------------ dati
 tutti = carica()
+_m = max(d.get('data_aggiornamento') or '' for d in tutti)
+DATA_DATI = f'{_m[6:8]}/{_m[4:6]}/{_m[0:4]}'  # dalla API, non scritta a mano
 lista = json.load(open(os.path.join(ROOT, "dati", "lista_arezzo.json"), encoding="utf-8"))
 URLMAP.update({r["cod_locale_progetto"]: r["url"] for r in lista})
 semplici = {}
@@ -263,9 +274,10 @@ def home():
     corso_html = "".join(riga_progetto(d).replace("{R}", "") for d in corso[:10])
     ope = [d for d in perim if is_opera(d)]
     c = f"""
-<h1>Quali progetti pubblici riguardano Arezzo?</h1>
+<div class="hero"><h1>Quali progetti pubblici riguardano Arezzo?</h1>
 <p class="lead">Qui trovi i progetti del Comune di Arezzo finanziati con i fondi di coesione (risorse europee e nazionali per ridurre le differenze tra territori), con importi e stato presi dai dati ufficiali.</p>
-<p class="data"><strong>Dati aggiornati al {DATA_DATI}</strong> · Fonte: OpenCoesione</p>
+<form class="cerca" action="dati/" method="get" role="search"><input name="q" type="search" aria-label="Cerca un progetto" placeholder="Cerca un progetto: per esempio scuola, strada, ponte, museo"><button type="submit">Cerca</button></form>
+<div class="passi"><a href="opere/#corso"><strong>Cosa si sta facendo adesso</strong>Progetti in corso, dal più grande</a><a href="opere/"><strong>Opere e progetti</strong>Tutto l'elenco, in parole semplici</a><a href="dati/"><strong>Tabella e file CSV</strong>Per filtrare e scaricare i dati</a></div></div>
 <p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l'opera. Possono non riflettere lo stato reale.</p>
 
 <h2>1. Quanti soldi riguardano i progetti principali di Arezzo?</h2>
@@ -297,6 +309,7 @@ def home():
 
 # ------------------------------------------------------------------ elenco opere
 def elenco():
+    os.makedirs(os.path.join(SITE, "opere"), exist_ok=True)
     def sez(titolo, lst, ident):
         return f'<h2 id="{ident}">{titolo} ({len(lst)})</h2><ul class="lista">' + "".join(riga_progetto(d).replace("{R}", "../") for d in lst) + "</ul>"
     ope = sorted([d for d in perim if is_opera(d)], key=fin, reverse=True)
@@ -305,9 +318,18 @@ def elenco():
 <p class="lead">Le opere e gli acquisti sono elencati per primi; poi gli altri progetti in corso o non ancora avviati. I progetti conclusi dal 2016 che non sono opere si trovano in <a href="../dati/">Dati completi</a>.</p>
 <p class="data">Dati aggiornati al {DATA_DATI}</p>{avviso()}
 <p>Vai a: <a href="#opere">Opere e acquisti</a> · <a href="#corso">In corso</a> · <a href="#nonav">Non ancora avviati</a></p>
+<div class="filtri"><label>Cerca in questa pagina <input id="qo" type="search" placeholder="per esempio scuola, ponte, museo"></label><span id="conto" class="mu" aria-live="polite"></span></div>
+<div id="vuotoo" class="vuoto" hidden>Nessun progetto contiene questa parola. Prova con una parola più corta o cancella la ricerca. Per cercare tra tutti i progetti usa <a href="../dati/">Dati completi</a>.</div>
 {sez("Opere e acquisti di beni", ope, "opere")}
 {sez("Altri progetti in corso", altri_c, "corso")}
-{sez("Progetti non ancora avviati", nonav, "nonav")}"""
+{sez("Progetti non ancora avviati", nonav, "nonav")}
+<script src="filtro.js"></script>"""
+    open(os.path.join(SITE, "opere", "filtro.js"), "w").write("""(function(){var q=document.getElementById('qo'),c=document.getElementById('conto'),v=document.getElementById('vuotoo');
+var li=[].slice.call(document.querySelectorAll('ul.lista li'));
+function f(){var x=q.value.toLowerCase().trim(),n=0;li.forEach(function(e){var ok=!x||e.textContent.toLowerCase().indexOf(x)>-1;e.hidden=!ok;if(ok)n++});
+document.querySelectorAll('h2[id]').forEach(function(h){var u=h.nextElementSibling;h.hidden=!!x&&!u.querySelector('li:not([hidden])')});
+v.hidden=n>0;c.textContent=x?(n+(n==1?' progetto trovato':' progetti trovati')):''}
+q.oninput=f;f()})();""")
     pagina("opere/index.html", "Opere e progetti", c, "opere", profondita=1)
 
 # ------------------------------------------------------------------ scheda
@@ -334,7 +356,9 @@ def scheda(d):
         note = f'<p class="avv">La data di fine prevista ({prevista(d)}) è precedente alla data dei dati: scadenza superata secondo i dati.</p>'
     c = f"""<p><a href="../opere/">← Opere e progetti</a></p>
 <h1>{esc(titolo_vis(d))}</h1>{orig}
-<p class="data">Dati aggiornati al {DATA_DATI}</p>{note}
+<div class="stati"><span class="tag st">{esc(d['oc_stato_progetto'])}</span><span class="tag">{esc(tema_s(d))}</span><span class="tag">{esc(natura(d))}</span></div>
+<p class="lead">{esc(ente_str(d))}: {eur(fin(d))} finanziati, {eur(pag(d))} già pagati.</p>
+<p class="data">Dati di questo progetto aggiornati al {data(d.get('data_aggiornamento'))}</p>{note}
 <div class="cards"><div class="card fin"><div class="n">{eur(fin(d))}</div>Finanziato</div><div class="card pag"><div class="n">{eur(pag(d))}</div>Già pagato ({perc} del finanziato)</div></div>
 <h2>Che cos'è</h2>
 <dl class="sch"><dt>Argomento</dt><dd>{esc(tema_s(d))} <span class="small mu">(termine ufficiale: {esc(tema(d))})</span></dd><dt>Tipo</dt><dd>{esc(natura(d))}; {esc(frase(d['cup_descr_categoria']))}</dd>
@@ -378,13 +402,19 @@ def dati_completi():
 <label>Argomento <select id="ft"><option value="">Tutti</option>{''.join(f'<option>{esc(s)}</option>' for s in temi)}</select></label>
 <span id="cont" class="mu" aria-live="polite"></span></div>
 <div class="sc"><table id="tab"><thead><tr><th>Titolo</th><th>CUP</th><th>Argomento</th><th>Stato</th><th>Finanziato</th><th>Già pagato</th><th>Fine prevista</th><th>Fine effettiva</th><th>Ente</th></tr></thead><tbody>{tr}</tbody></table></div>
+<div id="vuoto" class="vuoto" hidden>Nessun progetto corrisponde ai filtri. <button type="button" id="azzera" class="btn">Azzera i filtri</button></div>
 <noscript><p>Per filtrare serve JavaScript; l'elenco è comunque completo e il CSV è scaricabile.</p></noscript>
 <script src="filtri.js"></script>"""
     pagina("dati/index.html", "Dati completi", c, "dati", profondita=1)
-    open(os.path.join(SITE, "dati", "filtri.js"), "w").write("""(function(){var q=document.getElementById('q'),s=document.getElementById('fs'),t=document.getElementById('ft'),c=document.getElementById('cont');
-var rows=[].slice.call(document.querySelectorAll('#tab tbody tr'));function f(){var x=q.value.toLowerCase(),n=0;rows.forEach(function(r){
+    open(os.path.join(SITE, "dati", "filtri.js"), "w").write("""(function(){var q=document.getElementById('q'),s=document.getElementById('fs'),t=document.getElementById('ft'),c=document.getElementById('cont'),v=document.getElementById('vuoto'),z=document.getElementById('azzera');
+var rows=[].slice.call(document.querySelectorAll('#tab tbody tr'));
+function f(){var x=q.value.toLowerCase().trim(),n=0;rows.forEach(function(r){
 var ok=(!s.value||r.dataset.s===s.value)&&(!t.value||r.dataset.t===t.value)&&(!x||r.textContent.toLowerCase().indexOf(x)>-1);r.hidden=!ok;if(ok)n++});
-c.textContent=n+(n==1?' progetto mostrato':' progetti mostrati')}q.oninput=s.onchange=t.onchange=f;f()})();""")
+c.textContent=n+(n==1?' progetto mostrato':' progetti mostrati');v.hidden=n>0}
+q.oninput=s.onchange=t.onchange=f;
+z.onclick=function(){q.value='';s.value='';t.value='';f();q.focus()};
+try{var p=new URLSearchParams(location.search);if(p.get('q'))q.value=p.get('q')}catch(e){}
+f()})();""")
 
 # ------------------------------------------------------------------ metodo
 def metodo():
