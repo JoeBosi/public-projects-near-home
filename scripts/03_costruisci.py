@@ -120,7 +120,7 @@ a{color:var(--ac)}a:focus-visible,button:focus-visible,input:focus-visible,selec
 .w{max-width:960px;margin:0 auto;padding:0 16px}
 header.top{border-bottom:1px solid var(--l);background:var(--sf)}
 header.top .w.nav{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;padding:10px 16px}header.top .fonte{background:#0b3d6e;color:#fff;font-size:.88rem;padding:5px 0}header.top .fonte a{color:#fff}
-header.top b{font-size:1.05rem}nav{display:flex;flex-wrap:wrap;gap:4px 18px}nav a{text-decoration:none;padding:4px 0}nav a.on{border-bottom:3px solid var(--ac);font-weight:600}
+header.top b{font-size:1.05rem}nav{display:flex;flex:1 1 auto;flex-wrap:wrap;gap:4px 18px}nav a{text-decoration:none;padding:4px 0}nav a.tut{margin-left:auto;color:#000;font-weight:600}nav a.on{border-bottom:3px solid var(--ac);font-weight:600}
 h1{font-size:2rem;line-height:1.2;margin:1.2rem 0 .6rem}h2{font-size:1.4rem;margin:2.2rem 0 .6rem}h3{font-size:1.1rem;margin:1.4rem 0 .4rem}
 .lead{font-size:1.2rem;color:var(--tx)}.mu{color:var(--mu)}.small{font-size:.9rem}
 .data{display:inline-block;background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:6px 12px;margin:.3rem 0}
@@ -153,8 +153,8 @@ footer{border-top:1px solid var(--l);background:var(--sf);margin-top:3rem;paddin
 def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
     rel = "../" * profondita
     nav = [("", "Per cominciare", "home"), ("opere/", "Opere e progetti", "opere"), ("dati/", "Dati completi", "dati"),
-           ("guida/", "Guida agli open data", "guida"), ("metodo/", "Metodo e fonti", "metodo")]
-    n = "".join(f'<a href="{rel}{h}"{" class=on aria-current=page" if k == attiva else ""}>{t}</a>' for h, t, k in nav)
+           ("metodo/", "Metodo e fonti", "metodo"), ("guida/", "Tutorial", "guida")]
+    n = "".join(f'<a href="{rel}{h}" class="{"on " if k == attiva else ""}{"tut" if k == "guida" else ""}"{" aria-current=page" if k == attiva else ""}>{t}</a>' for h, t, k in nav)
     doc = f"""<!doctype html>
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(titolo)} | Progetti pubblici sotto casa</title>
