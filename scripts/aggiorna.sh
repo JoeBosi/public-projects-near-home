@@ -20,6 +20,7 @@ fallito() { echo "FALLITO: $1" | tee -a "$LOG"; avvisa "Opendata: aggiornamento 
 } >>"$LOG" 2>&1 || exit 1
 rsync -a "$PUB"/ "$W/sito-precedente/" || fallito "copia di sicurezza del sito precedente"
 rsync -a --delete "$OC_SITE"/ "$PUB"/ || fallito "pubblicazione"
+$PY scripts/05_indexnow.py >>"$LOG" 2>&1 || echo "IndexNow non riuscito (non blocca la pubblicazione)" >>"$LOG"
 R="$W/report.json"
 MSG=$($PY -c "import json;r=json.load(open('$R'));print(f\"Pubblicato. Dati al {r['data_dati']}: {r['n_perimetro']} progetti, finanziato {r['finanziato']:,} €, pagato {r['pagato']:,} €. Titoli semplici: {r['titoli_semplici']}; ancora con titolo ufficiale da semplificare: {r['titoli_ufficiali_da_semplificare']}.\")")
 echo "$MSG" | tee -a "$LOG"; avvisa "Opendata aggiornato" "$MSG"
