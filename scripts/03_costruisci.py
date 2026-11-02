@@ -138,7 +138,7 @@ a{color:var(--ac)}a:focus-visible,button:focus-visible,input:focus-visible,selec
 .w{max-width:960px;margin:0 auto;padding:0 16px}
 header.top{border-bottom:1px solid var(--l);background:var(--sf)}
 html{scroll-padding-top:110px}header.top{position:sticky;top:0;z-index:50}header.top .w.nav{display:flex;flex-wrap:wrap;gap:2px 24px;align-items:center;padding:6px 16px}header.top .fonte{background:#0b3d6e;color:#fff;font-size:.88rem;padding:5px 0}header.top .fonte a{color:#fff}header.top .conc{font-size:.8rem;opacity:.9;padding-top:1px}header.top .fl{display:flex;justify-content:space-between;align-items:center;gap:12px}a.lingua{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:none;border:1px solid #ffffff80;border-radius:6px;padding:1px 8px}
-header.top b{font-size:1.05rem}nav{display:flex;flex:1 1 auto;flex-wrap:wrap;gap:4px 18px}nav a{text-decoration:none;padding:4px 0}nav a.tut{margin-left:auto;color:#000;font-weight:600}nav a.on{border-bottom:3px solid var(--ac);font-weight:600}
+header.top b{font-size:1.05rem}nav{display:flex;flex:1 1 auto;flex-wrap:wrap;gap:4px 18px}nav a{text-decoration:none;padding:4px 0}nav a.tut{margin-left:auto;color:#000;font-weight:600}nav a.cod{color:#6D28D9;font-weight:700}nav a.cod::before{content:'</> ';font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700}nav a.cod.on{border-bottom-color:#6D28D9}nav a.on{border-bottom:3px solid var(--ac);font-weight:600}
 h1{font-size:2rem;line-height:1.2;margin:1.2rem 0 .6rem}h2{font-size:1.4rem;margin:2.2rem 0 .6rem}h3{font-size:1.1rem;margin:1.4rem 0 .4rem}
 .lead{font-size:1.2rem;color:var(--tx)}.mu{color:var(--mu)}.small{font-size:.9rem}
 .data{display:inline-block;background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:6px 12px;margin:.3rem 0}
@@ -156,7 +156,8 @@ pre{background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:12p
 .tag{display:inline-block;border:1px solid var(--l);border-radius:6px;padding:0 8px;font-size:.85rem;background:var(--sf)}
 .filtri{display:flex;flex-wrap:wrap;gap:10px;margin:.8rem 0}.filtri input,.filtri select{font:inherit;padding:8px;border:1px solid var(--l);border-radius:8px;max-width:100%}
 
-.sch-o{display:block;width:100%;height:auto;margin:.6rem 0}.sch-v{display:none;width:100%;max-width:360px;height:auto;margin:.6rem auto}@media(max-width:700px){.sch-o{display:none}.sch-v{display:block}}.puoi{margin:.4rem 0 .8rem;padding-left:1.2rem}.puoi li{margin:.2rem 0}
+.sch-o{display:block;width:100%;height:auto;margin:.6rem 0}.sch-v{display:none;width:100%;max-width:360px;height:auto;margin:.6rem auto}@media(max-width:700px){.sch-o{display:none}.sch-v{display:block}}.build{border:2px solid var(--ac);border-radius:12px;background:#fff;padding:14px 16px;margin:1.2rem 0}.build h2{margin:0 0 .4rem;font-size:1.25rem}.build p{margin:.3rem 0 .6rem}
+.puoi{margin:.4rem 0 .8rem;padding-left:1.2rem}.puoi li{margin:.2rem 0}
 .hero{background:var(--sf);border:1px solid var(--l);border-radius:14px;padding:18px 18px 14px;margin:1rem 0 1.4rem}
 .hero h1{margin-top:0}.cerca{display:flex;flex-wrap:wrap;gap:8px;margin:.8rem 0}.cerca input{flex:1 1 240px;font:inherit;padding:12px;border:2px solid var(--ac);border-radius:10px}
 .cerca button,.btn.pri{font:inherit;background:var(--ac);color:#fff;border:2px solid var(--ac);border-radius:10px;padding:12px 18px;cursor:pointer;font-weight:600}
@@ -166,7 +167,7 @@ pre{background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:12p
 .stati{display:flex;flex-wrap:wrap;gap:8px;margin:.4rem 0 1rem}.stati .tag{font-size:.95rem;padding:2px 10px}
 .tag.st{background:#e6f0fb;border-color:#9bbfe6;font-weight:600}
 footer{border-top:1px solid var(--l);background:var(--sf);margin-top:3rem;padding:18px 0;font-size:.92rem}
-@media(max-width:600px){html{scroll-padding-top:96px}header.top .fonte{font-size:.74rem;line-height:1.3;padding:3px 0}header.top .conc{font-size:.7rem}a.lingua{padding:0 6px}a.lingua svg{width:18px;height:12px}header.top .w.nav{padding:4px 16px;gap:0}header.top .w.nav>b{display:none}header.top.sc .conc{display:none}nav{gap:0 14px;font-size:.92rem}nav a{white-space:nowrap;padding:3px 0}body{font-size:17px}h1{font-size:1.65rem}dl.sch{grid-template-columns:1fr}dl.sch dt{margin-top:6px}}
+@media(max-width:600px){html{scroll-padding-top:96px}header.top .fonte{font-size:.74rem;line-height:1.3;padding:3px 0}header.top .conc{font-size:.7rem}a.lingua{padding:0 6px}a.lingua svg{width:18px;height:12px}header.top .w.nav{padding:4px 16px;gap:0}header.top .w.nav>b{display:none}header.top.sc .conc{display:none}nav{gap:0 11px;font-size:.86rem}nav a{white-space:nowrap;padding:3px 0}body{font-size:17px}h1{font-size:1.65rem}dl.sch{grid-template-columns:1fr}dl.sch dt{margin-top:6px}}
 """
 
 FLAG_IT = '<svg width="22" height="15" viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#009246"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ce2b37"/></svg>'
@@ -178,23 +179,24 @@ FOOT_EN = '<p>The data come from <a href="https://opencoesione.gov.it/">OpenCoes
 
 def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
     en = LANG == "en"
-    rel = "../" * (profondita + (1 if en else 0))
+    rel = "../" * (profondita + (1 if en else 0))   # radice del sito (CSS)
+    lrel = "../" * profondita                         # radice della lingua corrente (link di navigazione)
     dir_p = percorso[:-len("index.html")] if percorso.endswith("index.html") else percorso
     altra = ("../" * (profondita + 1) + dir_p) if en else (rel + "en/" + dir_p)
     flag = (f'<a class="lingua" href="{altra}" hreflang="it" lang="it" title="Italiano">{FLAG_IT}<span>IT</span></a>' if en
             else f'<a class="lingua" href="{altra}" hreflang="en" lang="en" title="English">{FLAG_UK}<span>EN</span></a>')
     alt_it = f'<link rel="alternate" hreflang="it" href="{SITO}/{dir_p}"><link rel="alternate" hreflang="en" href="{SITO}/en/{dir_p}">'
     nav = ([("", "Start here", "home"), ("opere/", "Projects", "opere"), ("dati/", "Full data", "dati"),
-            ("metodo/", "Method and sources", "metodo"), ("guida/", "Tutorial", "guida")] if en else
+            ("metodo/", "Method and sources", "metodo"), ("guida/", "Tutorial", "guida"), ("guida/costruisci/", "Coding", "coding")] if en else
            [("", "Per cominciare", "home"), ("opere/", "Opere e progetti", "opere"), ("dati/", "Dati completi", "dati"),
-            ("metodo/", "Metodo e fonti", "metodo"), ("guida/", "Tutorial", "guida")])
-    n = "".join(f'<a href="{rel}{h}" class="{"on " if k == attiva else ""}{"tut" if k == "guida" else ""}"{" aria-current=page" if k == attiva else ""}>{t}</a>' for h, t, k in nav)
+            ("metodo/", "Metodo e fonti", "metodo"), ("guida/", "Tutorial", "guida"), ("guida/costruisci/", "Coding", "coding")])
+    n = "".join(f'<a href="{lrel}{h}" class="{"on " if k == attiva else ""}{"tut" if k == "guida" else ("cod" if k == "coding" else "")}"{" aria-current=page" if k == attiva else ""}>{t}</a>' for h, t, k in nav)
     doc = f"""<!doctype html>
 <html lang="{LANG}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(titolo)} | {T("Progetti pubblici sotto casa", "Public projects near home")}</title>{alt_it}
 <meta name="description" content="{esc(descr or T('I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.', 'Projects funded with public cohesion funds in the Municipality of Arezzo, explained simply, with the official OpenCoesione data.'))}">
 <link rel="stylesheet" href="{rel}stile.css"></head><body>
-<header class="top"><div class="fonte"><div class="w fl"><span>{T("Fonte", "Source")}: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · {T("ultimo aggiornamento dei dati", "latest data update")}: <strong>{DATA_ISO if en else DATA_DATI}</strong></span>{flag}</div><div class="w conc">{T("Progetto indipendente, a titolo didattico, con dati ufficiali.", "Independent project, for educational purposes, using official data.")}</div></div><div class="w nav"><b><a href="{rel}" style="text-decoration:none;color:inherit">{T("Progetti pubblici sotto casa", "Public projects near home")}</a></b><nav aria-label="Principale">{n}</nav></div></header>
+<header class="top"><div class="fonte"><div class="w fl"><span>{T("Fonte", "Source")}: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · {T("ultimo aggiornamento dei dati", "latest data update")}: <strong>{DATA_ISO if en else DATA_DATI}</strong></span>{flag}</div><div class="w conc">{T("Progetto indipendente, a titolo didattico, con dati ufficiali.", "Independent project, for educational purposes, using official data.")}</div></div><div class="w nav"><b><a href="{lrel or './'}" style="text-decoration:none;color:inherit">{T("Progetti pubblici sotto casa", "Public projects near home")}</a></b><nav aria-label="Principale">{n}</nav></div></header>
 <script>(function(){{var h=document.querySelector("header.top");function f(){{document.documentElement.style.scrollPaddingTop=(h.offsetHeight+8)+"px"}}function g(){{h.classList.toggle("sc",scrollY>40);f()}}f();addEventListener("resize",f);addEventListener("scroll",g,{{passive:true}})}})()</script>
 <main class="w">{corpo}</main>
 <footer><div class="w">{FOOT_EN.replace('{DATA_ISO}', DATA_ISO) if en else FOOT_IT.replace('{DATA_DATI}', DATA_DATI)}
@@ -365,6 +367,7 @@ def home():
 <div class="passi"><a href="opere/#corso"><strong>What is happening now</strong>Ongoing projects, largest first</a><a href="opere/"><strong>Projects</strong>The whole list</a><a href="dati/"><strong>Table and CSV file</strong>To filter and download the data</a></div></div>
 <h2 class="pic">How it works</h2>
 {schema_svg([("Official source", "OpenCoesione, public database"), ("Updated every 3 months", "download and automatic checks"), ("Titles in plain Italian", "original title shown beside it"), ("You search and check", "search, pages, source links")])}
+<div class="build"><h2>Build it yourself: basic version, step by step</h2><p>Build a basic version of this site with Python in about fifteen minutes, from the same official data.</p><a class="btn pri" style="text-decoration:none" href="guida/costruisci/">Go to the coding guide</a><a class="btn" href="https://github.com/JoeBosi/public-projects-near-home">Code on GitHub</a></div>
 <p class="avv"><strong>What the data show.</strong> The data show how much money is assigned and paid; for the state of a site, see the project page and the sources.</p>
 """
     else:
@@ -401,6 +404,7 @@ def home():
 <div class="passi"><a href="opere/#corso"><strong>Cosa si sta facendo adesso</strong>Progetti in corso, dal più grande</a><a href="opere/"><strong>Opere e progetti</strong>Tutto l'elenco, in parole semplici</a><a href="dati/"><strong>Tabella e file CSV</strong>Per filtrare e scaricare i dati</a></div></div>
 <h2 class="pic">Come funziona</h2>
 {schema_svg([("Fonte ufficiale", "OpenCoesione, banca dati pubblica"), ("Aggiornamento ogni 3 mesi", "scarico e controlli automatici"), ("Titoli in parole semplici", "con il titolo originale accanto"), ("Tu cerchi e controlli", "ricerca, schede, link alla fonte")])}
+<div class="build"><h2>Costruiscilo tu: versione base, passo passo</h2><p>Crea in un quarto d'ora una versione base di questo sito con Python, partendo dagli stessi dati ufficiali.</p><a class="btn pri" style="text-decoration:none" href="guida/costruisci/">Vai al coding</a><a class="btn" href="https://github.com/JoeBosi/public-projects-near-home">Codice su GitHub</a></div>
 <p class="avv"><strong>Cosa dicono i dati.</strong> I dati mostrano quanti soldi sono assegnati e pagati; per lo stato del cantiere guarda la scheda del progetto e le fonti.</p>
 """
     pagina("index.html", T("Cosa si sta costruendo con i soldi pubblici vicino a casa tua?", "What is being built with public money near your home?"), top + c1, "home")
@@ -843,7 +847,7 @@ cd mini-sito</code></pre>
 <h2>Esito della nostra prova</h2>
 <p>Eseguito il 2 novembre 2026 da una cartella vuota, con Python 3.12.3 su Linux, seguendo esattamente i passi qui sopra. Il <strong>primo tentativo è fallito</strong>: il servizio ha risposto 429 a metà scarico, perché la pausa di un secondo non bastava. Abbiamo aggiunto l'attesa con nuovi tentativi che vedi nel codice, ripetuto la prova da una cartella vuota ed è arrivata in fondo in 3 minuti e 32 secondi. I totali coincidono con quelli della lista completa dei progetti di Arezzo usata da questo sito. Dopo la prova abbiamo avvolto la tabella in un contenitore scorrevole perché sul telefono (390 px) usciva dallo schermo; l'abbiamo ricontrollato rilanciando il programma con la cache già scaricata. Non provato: Windows e macOS, altre versioni di Python, altri Comuni.</p>"""
         titolo = "Costruisci una versione base del sito"
-    pagina("guida/costruisci/index.html", titolo, c, "guida", profondita=2)
+    pagina("guida/costruisci/index.html", titolo, c, "coding", profondita=2)
 
 # ------------------------------------------------------------------ robots, sitemap, main
 def varie():
