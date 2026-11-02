@@ -53,7 +53,7 @@ table{{border-collapse:collapse;width:100%}}td,th{{border-bottom:1px solid #d9e0
 <h1>Public projects in Arezzo</h1>
 <p><span class="n">{fmt(funded)}</span> funded and <span class="n">{fmt(paid)}</span> already paid, across {len(projects)} projects.</p>
 <h2>The 15 largest ongoing projects</h2>
-<table><tr><th>Title (Italian)</th><th>Funded</th><th>Already paid</th></tr>{rows}</table>
+<div style="overflow-x:auto"><table><tr><th>Title (Italian)</th><th>Funded</th><th>Already paid</th></tr>{rows}</table></div>
 </body></html>"""
 os.makedirs("site", exist_ok=True)
 open("site/index.html", "w", encoding="utf-8").write(page_html)

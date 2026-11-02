@@ -53,7 +53,7 @@ table{{border-collapse:collapse;width:100%}}td,th{{border-bottom:1px solid #d9e0
 <h1>Progetti pubblici ad Arezzo</h1>
 <p><span class="n">{fmt(finanziato)}</span> finanziati e <span class="n">{fmt(pagato)}</span> già pagati, su {len(progetti)} progetti.</p>
 <h2>I 15 progetti in corso più grandi</h2>
-<table><tr><th>Titolo</th><th>Finanziato</th><th>Già pagato</th></tr>{righe}</table>
+<div style="overflow-x:auto"><table><tr><th>Titolo</th><th>Finanziato</th><th>Già pagato</th></tr>{righe}</table></div>
 </body></html>"""
 os.makedirs("sito", exist_ok=True)
 open("sito/index.html", "w", encoding="utf-8").write(pagina_html)
