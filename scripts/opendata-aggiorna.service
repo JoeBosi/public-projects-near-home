@@ -1,0 +1,7 @@
+[Unit]
+Description=Aggiornamento trimestrale di Progetti pubblici sotto casa (OpenCoesione)
+
+[Service]
+Type=oneshot
+ExecStart=/root/Developer/OpenData-PNRR/scripts/aggiorna.sh
+TimeoutStartSec=4h

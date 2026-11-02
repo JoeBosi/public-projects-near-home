@@ -1,7 +1,7 @@
 """Accesso alla API OpenCoesione con cache su disco e pausa tra le chiamate."""
 import json, os, time, urllib.request, hashlib
 BASE = "https://opencoesione.gov.it/it/api"
-CACHE = os.path.join(os.path.dirname(__file__), "..", "dati", "cache")
+CACHE = os.environ.get("OC_CACHE") or os.path.join(os.path.dirname(__file__), "..", "dati", "cache")
 PAUSA = 1.0
 _ultimo = [0.0]
 

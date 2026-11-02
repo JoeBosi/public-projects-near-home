@@ -3,7 +3,7 @@ import csv, glob, html, json, os, re, sys, collections, datetime
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import api
-SITE = os.path.join(ROOT, "site")
+SITE = os.environ.get("OC_SITE") or os.path.join(ROOT, "site")
 SITO = "https://opendata.giuseppebosi.com"
 DATA_DATI = None  # calcolata dai dati in carica()
 SOGLIA = "20160101"
@@ -163,7 +163,7 @@ def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
 <header class="top"><div class="fonte"><div class="w">Fonte: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · ultimo aggiornamento dei dati: <strong>{DATA_DATI}</strong></div></div><div class="w nav"><b><a href="{rel}" style="text-decoration:none;color:inherit">Progetti pubblici sotto casa</a></b><nav aria-label="Principale">{n}</nav></div></header>
 <main class="w">{corpo}</main>
 <footer><div class="w"><p>I dati provengono da <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licenza <a href="https://creativecommons.org/licenses/by/4.0/deed.it">CC BY 4.0</a>) e possono non riflettere lo stato reale: sono quelli comunicati dagli enti. Per segnalare un errore scrivi a <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Dati aggiornati al {DATA_DATI}.</p>
-<p>A cura del Prof. Giuseppe Bosi, Professore di Scienze e Tecnologie Informatiche — <a href="https://www.giuseppebosi.com">www.giuseppebosi.com</a></p></div></footer>
+<p>A cura del Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche — <a href="https://www.giuseppebosi.com">www.giuseppebosi.com</a></p></div></footer>
 </body></html>"""
     p = os.path.join(SITE, percorso)
     os.makedirs(os.path.dirname(p), exist_ok=True)
@@ -184,7 +184,7 @@ def slug(d):
 tutti = carica()
 _m = max(d.get('data_aggiornamento') or '' for d in tutti)
 DATA_DATI = f'{_m[6:8]}/{_m[4:6]}/{_m[0:4]}'  # dalla API, non scritta a mano
-lista = json.load(open(os.path.join(ROOT, "dati", "lista_arezzo.json"), encoding="utf-8"))
+lista = json.load(open(os.environ.get("OC_LISTA") or os.path.join(ROOT, "dati", "lista_arezzo.json"), encoding="utf-8"))
 URLMAP.update({r["cod_locale_progetto"]: r["url"] for r in lista})
 semplici = {}
 for i in (1, 2, 3):
@@ -550,4 +550,10 @@ if __name__ == "__main__":
     home(); elenco(); dati_completi(); metodo(); guida(); varie()
     for d in perim:
         scheda(d)
+    # report per l'aggiornamento: titoli ancora ufficiali tra i progetti che dovrebbero averlo semplice
+    prior = [d for d in perim if d["oc_stato_progetto"] in ("In corso", "Non avviato") or is_opera(d)]
+    senza = [d["cod_locale_progetto"] for d in prior if d["cod_locale_progetto"] not in semplici]
+    json.dump({"data_dati": DATA_DATI, "n_lista": n_lista, "n_perimetro": n_perim, "finanziato": round(tot_fin), "pagato": round(tot_pag),
+               "titoli_semplici": len(prior) - len(senza), "titoli_ufficiali_da_semplificare": len(senza), "codici_da_semplificare": senza},
+              open(os.path.join(SITE, "..", "report.json") if os.environ.get("OC_SITE") else os.path.join(ROOT, "dati", "report.json"), "w"), ensure_ascii=False, indent=1)
     print("progetti dettagliati:", len(tutti), "perimetro:", n_perim, "finanziato", eur(tot_fin), "pagato", eur(tot_pag))

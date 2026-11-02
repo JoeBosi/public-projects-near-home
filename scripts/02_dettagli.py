@@ -5,7 +5,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 import api
 D = os.path.join(os.path.dirname(__file__), "..", "dati")
 num = lambda s: float((s or "0").replace(".", "").replace(",", "."))
-L = json.load(open(os.path.join(D, "lista_arezzo.json")))
+LISTA = os.environ.get("OC_LISTA") or os.path.join(D, "lista_arezzo.json")
+DETT = os.environ.get("OC_DETTAGLI") or os.path.join(D, "dettagli_arezzo.json")
+FALLITI = os.path.join(os.path.dirname(DETT), "falliti.txt")
+L = json.load(open(LISTA))
 def serve(r):
     if r["oc_stato_progetto"] != "Concluso":
         return True
@@ -24,8 +27,9 @@ for giro in range(3):
         except Exception as e:
             falliti.append(r["url"])
         if i % 50 == 0: print(giro, i, len(out), flush=True)
-    open(os.path.join(D, "falliti.txt"), "w").write("\n".join(falliti))
+    open(FALLITI, "w").write("\n".join(falliti))
     if not falliti: break
     time.sleep(60)
-json.dump(list(out.values()), open(os.path.join(D, "dettagli_arezzo.json"), "w"), ensure_ascii=False)
+json.dump(list(out.values()), open(DETT, "w"), ensure_ascii=False)
 print("FINITO", len(out), "falliti", len(falliti), flush=True)
+sys.exit(1 if falliti else 0)

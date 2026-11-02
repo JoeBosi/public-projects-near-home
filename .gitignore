@@ -3,3 +3,4 @@ dati/cache/
 dati/*.log
 __pycache__/
 site/
+dati/aggiornamento/
