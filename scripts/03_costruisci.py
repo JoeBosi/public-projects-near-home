@@ -276,7 +276,7 @@ def home():
     c = f"""
 <div class="hero"><h1>Quali progetti pubblici riguardano Arezzo?</h1>
 <p class="lead">Qui trovi i progetti del Comune di Arezzo finanziati con i fondi di coesione (risorse europee e nazionali per ridurre le differenze tra territori), con importi e stato presi dai dati ufficiali.</p>
-<form class="cerca" action="dati/" method="get" role="search"><input name="q" type="search" aria-label="Cerca un progetto" placeholder="Cerca un progetto: per esempio scuola, strada, ponte, museo"><button type="submit">Cerca</button></form>
+<form class="cerca" action="dati/" method="get" role="search"><input name="q" type="search" aria-label="Cerca un progetto" placeholder="Cerca: scuola, ponte, museo"><button type="submit">Cerca</button></form>
 <div class="passi"><a href="opere/#corso"><strong>Cosa si sta facendo adesso</strong>Progetti in corso, dal più grande</a><a href="opere/"><strong>Opere e progetti</strong>Tutto l'elenco, in parole semplici</a><a href="dati/"><strong>Tabella e file CSV</strong>Per filtrare e scaricare i dati</a></div></div>
 <p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l'opera. Possono non riflettere lo stato reale.</p>
 
