@@ -137,7 +137,7 @@ main p,main li,main dd,main h1,main h2,main h3{overflow-wrap:anywhere}
 a{color:var(--ac)}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
 .w{max-width:960px;margin:0 auto;padding:0 16px}
 header.top{border-bottom:1px solid var(--l);background:var(--sf)}
-header.top .w.nav{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;padding:10px 16px}header.top .fonte{background:#0b3d6e;color:#fff;font-size:.88rem;padding:5px 0}header.top .fonte a{color:#fff}header.top .conc{font-size:.8rem;opacity:.9;padding-top:1px}header.top .fl{display:flex;justify-content:space-between;align-items:center;gap:12px}a.lingua{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:none;border:1px solid #ffffff80;border-radius:6px;padding:1px 8px}
+html{scroll-padding-top:110px}header.top{position:sticky;top:0;z-index:50}header.top .w.nav{display:flex;flex-wrap:wrap;gap:2px 24px;align-items:center;padding:6px 16px}header.top .fonte{background:#0b3d6e;color:#fff;font-size:.88rem;padding:5px 0}header.top .fonte a{color:#fff}header.top .conc{font-size:.8rem;opacity:.9;padding-top:1px}header.top .fl{display:flex;justify-content:space-between;align-items:center;gap:12px}a.lingua{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:none;border:1px solid #ffffff80;border-radius:6px;padding:1px 8px}
 header.top b{font-size:1.05rem}nav{display:flex;flex:1 1 auto;flex-wrap:wrap;gap:4px 18px}nav a{text-decoration:none;padding:4px 0}nav a.tut{margin-left:auto;color:#000;font-weight:600}nav a.on{border-bottom:3px solid var(--ac);font-weight:600}
 h1{font-size:2rem;line-height:1.2;margin:1.2rem 0 .6rem}h2{font-size:1.4rem;margin:2.2rem 0 .6rem}h3{font-size:1.1rem;margin:1.4rem 0 .4rem}
 .lead{font-size:1.2rem;color:var(--tx)}.mu{color:var(--mu)}.small{font-size:.9rem}
@@ -156,6 +156,7 @@ pre{background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:12p
 .tag{display:inline-block;border:1px solid var(--l);border-radius:6px;padding:0 8px;font-size:.85rem;background:var(--sf)}
 .filtri{display:flex;flex-wrap:wrap;gap:10px;margin:.8rem 0}.filtri input,.filtri select{font:inherit;padding:8px;border:1px solid var(--l);border-radius:8px;max-width:100%}
 
+.sch-o{display:block;width:100%;height:auto;margin:.6rem 0}.sch-v{display:none;width:100%;max-width:360px;height:auto;margin:.6rem auto}@media(max-width:700px){.sch-o{display:none}.sch-v{display:block}}.puoi{margin:.4rem 0 .8rem;padding-left:1.2rem}.puoi li{margin:.2rem 0}
 .hero{background:var(--sf);border:1px solid var(--l);border-radius:14px;padding:18px 18px 14px;margin:1rem 0 1.4rem}
 .hero h1{margin-top:0}.cerca{display:flex;flex-wrap:wrap;gap:8px;margin:.8rem 0}.cerca input{flex:1 1 240px;font:inherit;padding:12px;border:2px solid var(--ac);border-radius:10px}
 .cerca button,.btn.pri{font:inherit;background:var(--ac);color:#fff;border:2px solid var(--ac);border-radius:10px;padding:12px 18px;cursor:pointer;font-weight:600}
@@ -165,15 +166,15 @@ pre{background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:12p
 .stati{display:flex;flex-wrap:wrap;gap:8px;margin:.4rem 0 1rem}.stati .tag{font-size:.95rem;padding:2px 10px}
 .tag.st{background:#e6f0fb;border-color:#9bbfe6;font-weight:600}
 footer{border-top:1px solid var(--l);background:var(--sf);margin-top:3rem;padding:18px 0;font-size:.92rem}
-@media(max-width:600px){body{font-size:17px}h1{font-size:1.65rem}dl.sch{grid-template-columns:1fr}dl.sch dt{margin-top:6px}}
+@media(max-width:600px){html{scroll-padding-top:96px}header.top .fonte{font-size:.74rem;line-height:1.3;padding:3px 0}header.top .conc{font-size:.7rem}a.lingua{padding:0 6px}a.lingua svg{width:18px;height:12px}header.top .w.nav{padding:4px 16px;gap:0}header.top .w.nav>b{display:none}header.top.sc .conc{display:none}nav{gap:0 14px;font-size:.92rem}nav a{white-space:nowrap;padding:3px 0}body{font-size:17px}h1{font-size:1.65rem}dl.sch{grid-template-columns:1fr}dl.sch dt{margin-top:6px}}
 """
 
 FLAG_IT = '<svg width="22" height="15" viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#009246"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ce2b37"/></svg>'
 FLAG_UK = ('<svg width="22" height="15" viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0 0L60 40M60 0L0 40" stroke="#fff" stroke-width="8"/>'
            '<path d="M0 0L60 40M60 0L0 40" stroke="#c8102e" stroke-width="3"/><path d="M30 0V40M0 20H60" stroke="#fff" stroke-width="13"/><path d="M30 0V40M0 20H60" stroke="#c8102e" stroke-width="7"/></svg>')
 
-FOOT_IT = '<p>I dati provengono da <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licenza <a href="https://creativecommons.org/licenses/by/4.0/deed.it">CC BY 4.0</a>) e possono non riflettere lo stato reale: sono quelli comunicati dagli enti. Per segnalare un errore scrivi a <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Dati aggiornati al ' + "{DATA_DATI}" + '.</p>'
-FOOT_EN = '<p>The data come from <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licence <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>) and may not reflect the actual situation: they are what public bodies reported. Official project texts are kept in Italian, as in the source. To report an error write to <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Data updated to ' + "{DATA_ISO}" + '.</p>'
+FOOT_IT = '<p>I dati provengono da <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licenza <a href="https://creativecommons.org/licenses/by/4.0/deed.it">CC BY 4.0</a>) e sono quelli comunicati dagli enti: per lo stato attuale di un\'opera consulta la scheda ufficiale e le fonti. Per segnalare una correzione scrivi a <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Dati aggiornati al ' + "{DATA_DATI}" + '.</p>'
+FOOT_EN = '<p>The data come from <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licence <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>) and are those reported by public bodies: for the current state of a work, see the official page and the sources. Official project texts appear in Italian, as published in the source. To suggest a correction write to <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Data updated to ' + "{DATA_ISO}" + '.</p>'
 
 def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
     en = LANG == "en"
@@ -193,7 +194,8 @@ def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
 <title>{esc(titolo)} | {T("Progetti pubblici sotto casa", "Public projects near home")}</title>{alt_it}
 <meta name="description" content="{esc(descr or T('I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.', 'Projects funded with public cohesion funds in the Municipality of Arezzo, explained simply, with the official OpenCoesione data.'))}">
 <link rel="stylesheet" href="{rel}stile.css"></head><body>
-<header class="top"><div class="fonte"><div class="w fl"><span>{T("Fonte", "Source")}: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · {T("ultimo aggiornamento dei dati", "latest data update")}: <strong>{DATA_ISO if en else DATA_DATI}</strong></span>{flag}</div><div class="w conc">{T("Concept a titolo didattico, con dati ufficiali. Non è un sito istituzionale.", "Educational concept using official data. Not an institutional website.")}</div></div><div class="w nav"><b><a href="{rel}" style="text-decoration:none;color:inherit">{T("Progetti pubblici sotto casa", "Public projects near home")}</a></b><nav aria-label="Principale">{n}</nav></div></header>
+<header class="top"><div class="fonte"><div class="w fl"><span>{T("Fonte", "Source")}: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · {T("ultimo aggiornamento dei dati", "latest data update")}: <strong>{DATA_ISO if en else DATA_DATI}</strong></span>{flag}</div><div class="w conc">{T("Progetto indipendente, a titolo didattico, con dati ufficiali.", "Independent project, for educational purposes, using official data.")}</div></div><div class="w nav"><b><a href="{rel}" style="text-decoration:none;color:inherit">{T("Progetti pubblici sotto casa", "Public projects near home")}</a></b><nav aria-label="Principale">{n}</nav></div></header>
+<script>(function(){{var h=document.querySelector("header.top");function f(){{document.documentElement.style.scrollPaddingTop=(h.offsetHeight+8)+"px"}}function g(){{h.classList.toggle("sc",scrollY>40);f()}}f();addEventListener("resize",f);addEventListener("scroll",g,{{passive:true}})}})()</script>
 <main class="w">{corpo}</main>
 <footer><div class="w">{FOOT_EN.replace('{DATA_ISO}', DATA_ISO) if en else FOOT_IT.replace('{DATA_DATI}', DATA_DATI)}
 <p>{T("A cura del Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche", "By Prof. Giuseppe Bosi, Computer Science and Technology")} — <a href="https://www.giuseppebosi.com">www.giuseppebosi.com</a></p></div></footer>
@@ -203,8 +205,8 @@ def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
     open(p, "w", encoding="utf-8").write(doc)
 
 def avviso():
-    return (T('<p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l\'opera. Possono non riflettere lo stato reale.</p>',
-              '<p class="avv"><strong>Limit.</strong> The data tell how much money is assigned and paid, not how the work was carried out. They may not reflect the actual situation.</p>'))
+    return (T('<p class="avv"><strong>Cosa dicono i dati.</strong> I dati mostrano quanti soldi sono assegnati e pagati; per lo stato del cantiere guarda la scheda del progetto e le fonti.</p>',
+              '<p class="avv"><strong>What the data show.</strong> The data show how much money is assigned and paid; for the state of a site, see the project page and the sources.</p>'))
 
 URLMAP = {}
 
@@ -283,6 +285,23 @@ def riga_progetto(d):
             f'<span class="small">{" · ".join(extra)}</span></li>')
 
 # ------------------------------------------------------------------ home
+def schema_svg(passi):
+    """Schemino 'come funziona': 4 riquadri con frecce. Due versioni (orizzontale e verticale), scelte dal CSS."""
+    def box(x, y, w, h, n, t, sub, tw):
+        return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" fill="#fff" stroke="#0b5cab" stroke-width="2"/>'
+                f'<circle cx="{x+22}" cy="{y+24}" r="13" fill="#0b5cab"/><text x="{x+22}" y="{y+29}" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">{n}</text>'
+                f'<text x="{x+42}" y="{y+29}" font-size="14" font-weight="700" fill="#1b2330">{esc(t)}</text>'
+                f'<text x="{x+14}" y="{y+54}" font-size="13" fill="#566074">{esc(sub)}</text>')
+    ar = lambda x1, y1, x2, y2: f'<path d="M{x1} {y1}L{x2} {y2}" stroke="#0b5cab" stroke-width="3" marker-end="url(#fr)"/>'
+    defs = '<defs><marker id="fr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#0b5cab"/></marker></defs>'
+    desc = " → ".join(t for t, _ in passi)
+    # verticale (telefono): viewBox 320 x 4*74+3*26
+    v = defs + "".join(box(0, i*100, 320, 74, i+1, t, sub, 0) for i, (t, sub) in enumerate(passi)) + "".join(ar(160, i*100+76, 160, i*100+98) for i in range(3))
+    # orizzontale (schermi larghi): 4 riquadri da 210, spazio 30
+    h = defs + "".join(box(i*255, 0, 225, 74, i+1, t, sub, 0) for i, (t, sub) in enumerate(passi)) + "".join(ar(i*255+227, 37, i*255+252, 37) for i in range(3))
+    return (f'<svg class="sch-o" viewBox="0 0 990 76" role="img" aria-label="{esc(desc)}" xmlns="http://www.w3.org/2000/svg">{h}</svg>'
+            f'<svg class="sch-v" viewBox="0 0 320 374" role="img" aria-label="{esc(desc)}" xmlns="http://www.w3.org/2000/svg">{v}</svg>')
+
 def home():
     en = LANG == "en"
     per_tema = collections.defaultdict(lambda: [0, 0, 0])
@@ -318,7 +337,7 @@ def home():
 <div class="card fin"><div class="n">{eur(tot_fin)}</div><div><strong>Funded</strong>: public money assigned.</div></div>
 <div class="card pag"><div class="n">{eur(tot_pag)}</div><div><strong>Already paid</strong>: money actually paid out, according to the data.</div></div>
 </div>
-<p><strong>What is not counted.</strong> The data for Arezzo include another {mig(n_fuori)} projects, with {eur(fuori_fin)} funded and {eur(fuori_pag)} already paid: mostly small projects already concluded (training courses, grants to individuals), or concluded before 2016 or with no end date. With all projects together the total would be {eur(tot_lista)} funded and {eur(tot_lista_pag)} already paid. Details in <a href="metodo/">Method and sources</a>.</p>
+<p><strong>The rest of the projects.</strong> The data for Arezzo include another {mig(n_fuori)} projects, with {eur(fuori_fin)} funded and {eur(fuori_pag)} already paid: mostly small projects already concluded (training courses, grants to individuals), or concluded before 2016 or with the end date missing. With all projects together the total is {eur(tot_lista)} funded and {eur(tot_lista_pag)} already paid. Details in <a href="metodo/">Method and sources</a>.</p>
 
 <h2>2. What for?</h2>
 <p>Projects are grouped by topic. <strong>Works and purchases</strong> ({npj(op_n)}) are kept apart from grants, incentives and services, which are far more numerous but smaller individually. The blue bar is the funded amount, the green one the amount already paid. Topic names are our own plain labels, with the Italian one in brackets.</p>
@@ -337,12 +356,16 @@ def home():
 <h2>Want to see the original data?</h2>
 <p>All the numbers above come from the public database OpenCoesione. In the <a href="guida/">Tutorial</a> you learn to read and download them yourself, and to <a href="guida/costruisci/">build a basic version of this website</a>. On the <a href="dati/">Full data</a> page you find all the columns and the file to open in a spreadsheet.</p>
 """
-        top = f"""<div class="hero"><h1>Which public projects concern Arezzo?</h1>
-<p class="lead">Here you find the projects of the Municipality of Arezzo funded with cohesion funds (European and national resources meant to reduce differences between territories), with amounts and status taken from official data.</p>
-<p class="small mu"><strong>Language note.</strong> Project titles, descriptions and names of public bodies come from the official source and stay in Italian: they are not translated. The data are real; only the interface is translated.</p>
+        top = f"""<div class="hero"><h1>What is being built with public money near your home?</h1>
+<p class="lead">Find out which works and projects are funded in Arezzo with cohesion funds (European and national resources meant to reduce differences between territories): how much they cost, who is in charge and how far along they are, with official data.</p>
+<p><strong>Here you can:</strong></p>
+<ul class="puoi"><li>discover the works and projects of the Municipality of Arezzo;</li><li>see the amounts: how much money is assigned and how much already paid;</li><li>check how far along they are: declared status and planned dates.</li></ul>
+<p class="small mu"><strong>Language.</strong> Project titles, descriptions and names of public bodies come from the official source and are shown in Italian, as published. The data are real; the interface is available in English.</p>
 <form class="cerca" action="dati/" method="get" role="search"><input name="q" type="search" aria-label="Search for a project" placeholder="{ph}"><button type="submit">Search</button></form>
 <div class="passi"><a href="opere/#corso"><strong>What is happening now</strong>Ongoing projects, largest first</a><a href="opere/"><strong>Projects</strong>The whole list</a><a href="dati/"><strong>Table and CSV file</strong>To filter and download the data</a></div></div>
-<p class="avv"><strong>Limit.</strong> The data tell how much money is assigned and paid, not how the work was carried out. They may not reflect the actual situation.</p>
+<h2 class="pic">How it works</h2>
+{schema_svg([("Official source", "OpenCoesione, public database"), ("Updated every 3 months", "download and automatic checks"), ("Titles in plain Italian", "original title shown beside it"), ("You search and check", "search, pages, source links")])}
+<p class="avv"><strong>What the data show.</strong> The data show how much money is assigned and paid; for the state of a site, see the project page and the sources.</p>
 """
     else:
         c1 = f"""<h2>1. Quanti soldi riguardano i progetti principali di Arezzo?</h2>
@@ -351,7 +374,7 @@ def home():
 <div class="card fin"><div class="n">{eur(tot_fin)}</div><div><strong>Finanziato</strong>: soldi pubblici assegnati.</div></div>
 <div class="card pag"><div class="n">{eur(tot_pag)}</div><div><strong>Già pagato</strong>: soldi usciti davvero, secondo i dati.</div></div>
 </div>
-<p><strong>Cosa non è contato.</strong> Nei dati di Arezzo ci sono altri {mig(n_fuori)} progetti, per {eur(fuori_fin)} finanziati e {eur(fuori_pag)} già pagati: per lo più piccoli progetti già conclusi (corsi, contributi alle persone), oppure conclusi prima del 2016 o senza data di fine. Con tutti i progetti insieme il totale sarebbe {eur(tot_lista)} finanziati e {eur(tot_lista_pag)} già pagati. Dettagli nel <a href="metodo/">Metodo e fonti</a>.</p>
+<p><strong>Il resto dei progetti.</strong> Nei dati di Arezzo ci sono altri {mig(n_fuori)} progetti, per {eur(fuori_fin)} finanziati e {eur(fuori_pag)} già pagati: per lo più piccoli progetti già conclusi (corsi, contributi alle persone), oppure conclusi prima del 2016 o con la data di fine mancante. Con tutti i progetti insieme il totale è {eur(tot_lista)} finanziati e {eur(tot_lista_pag)} già pagati. Dettagli nel <a href="metodo/">Metodo e fonti</a>.</p>
 
 <h2>2. Per fare cosa?</h2>
 <p>I progetti sono raggruppati per argomento. Le <strong>opere e gli acquisti</strong> ({pl(op_n, 'progetto', 'progetti')}) sono separati dai contributi, dagli incentivi e dai servizi, che sono molto più numerosi ma di importo singolo più piccolo. La barra blu è il finanziato, quella verde il già pagato.</p>
@@ -370,13 +393,17 @@ def home():
 <h2>Vuoi vedere i dati originali?</h2>
 <p>Tutti i numeri qui sopra vengono dalla banca dati pubblica OpenCoesione. Nel <a href="guida/">Tutorial</a> impari a leggerli e a scaricarli da solo, e a <a href="guida/costruisci/">costruire una versione base di questo sito</a>. Nella pagina <a href="dati/">Dati completi</a> trovi tutte le colonne e il file da aprire in un foglio di calcolo.</p>
 """
-        top = f"""<div class="hero"><h1>Quali progetti pubblici riguardano Arezzo?</h1>
-<p class="lead">Qui trovi i progetti del Comune di Arezzo finanziati con i fondi di coesione (risorse europee e nazionali per ridurre le differenze tra territori), con importi e stato presi dai dati ufficiali.</p>
+        top = f"""<div class="hero"><h1>Cosa si sta costruendo con i soldi pubblici vicino a casa tua?</h1>
+<p class="lead">Scopri quali lavori e progetti sono finanziati ad Arezzo con i fondi di coesione (risorse europee e nazionali per ridurre le differenze tra territori): quanto costano, chi se ne occupa e a che punto sono, con i dati ufficiali.</p>
+<p><strong>Qui puoi:</strong></p>
+<ul class="puoi"><li>scoprire i lavori e i progetti del Comune di Arezzo;</li><li>vedere gli importi: quanti soldi sono assegnati e quanti già pagati;</li><li>controllare a che punto sono: stato dichiarato e date previste.</li></ul>
 <form class="cerca" action="dati/" method="get" role="search"><input name="q" type="search" aria-label="Cerca un progetto" placeholder="{ph}"><button type="submit">Cerca</button></form>
 <div class="passi"><a href="opere/#corso"><strong>Cosa si sta facendo adesso</strong>Progetti in corso, dal più grande</a><a href="opere/"><strong>Opere e progetti</strong>Tutto l'elenco, in parole semplici</a><a href="dati/"><strong>Tabella e file CSV</strong>Per filtrare e scaricare i dati</a></div></div>
-<p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l'opera. Possono non riflettere lo stato reale.</p>
+<h2 class="pic">Come funziona</h2>
+{schema_svg([("Fonte ufficiale", "OpenCoesione, banca dati pubblica"), ("Aggiornamento ogni 3 mesi", "scarico e controlli automatici"), ("Titoli in parole semplici", "con il titolo originale accanto"), ("Tu cerchi e controlli", "ricerca, schede, link alla fonte")])}
+<p class="avv"><strong>Cosa dicono i dati.</strong> I dati mostrano quanti soldi sono assegnati e pagati; per lo stato del cantiere guarda la scheda del progetto e le fonti.</p>
 """
-    pagina("index.html", T("Quali progetti pubblici riguardano Arezzo?", "Which public projects concern Arezzo?"), top + c1, "home")
+    pagina("index.html", T("Cosa si sta costruendo con i soldi pubblici vicino a casa tua?", "What is being built with public money near your home?"), top + c1, "home")
 
 # ------------------------------------------------------------------ elenco opere
 def elenco():
@@ -387,7 +414,7 @@ def elenco():
     altri_c = [d for d in corso if not is_opera(d)]
     c = f"""<h1>{T("Opere e progetti", "Projects")}</h1>
 <p class="lead">{T("Le opere e gli acquisti sono elencati per primi; poi gli altri progetti in corso o non ancora avviati. I progetti conclusi dal 2016 che non sono opere si trovano in <a href='../dati/'>Dati completi</a>.", "Public works and purchases come first; then the other projects that are ongoing or not yet started. Projects concluded since 2016 that are not works are in <a href='../dati/'>Full data</a>.")}</p>
-{T("", '<p class="small mu">Project titles, descriptions and the names of public bodies come from the official source and stay in Italian: they are not translated here. Status values (<span lang="it">In corso</span> = ongoing, <span lang="it">Non avviato</span> = not started) are explained in <a href="../metodo/#glossario">Method and sources</a>.</p>')}
+{T("", '<p class="small mu">Project titles, descriptions and the names of public bodies come from the official source and are shown in Italian, as published. Status values (<span lang="it">In corso</span> = ongoing, <span lang="it">Non avviato</span> = not started) are explained in <a href="../metodo/#glossario">Method and sources</a>.</p>')}
 <p class="data">{T("Dati aggiornati al", "Data updated to")} {DATA_ISO if LANG == "en" else DATA_DATI}</p>{avviso()}
 <p>{T("Vai a", "Jump to")}: <a href="#opere">{T("Opere e acquisti", "Works and purchases")}</a> · <a href="#corso">{T("In corso", "Ongoing")}</a> · <a href="#nonav">{T("Non ancora avviati", "Not yet started")}</a></p>
 <div class="filtri"><label>{T("Cerca in questa pagina", "Search this page")} <input id="qo" type="search" placeholder="{T("per esempio scuola, ponte, museo", "Italian words, e.g. scuola, ponte, museo")}"></label><span id="conto" class="mu" aria-live="polite"></span></div>
@@ -423,7 +450,7 @@ def scheda(d):
         s = None
     orig = ((f'<p class="small mu">Titolo riscritto in italiano semplice a partire dal titolo e dalla sintesi ufficiali. Titolo originale: «{esc(d["oc_titolo_progetto"])}»</p>' if not en else
              f'<p class="small mu">The title is shown in Italian, rewritten in plain Italian from the official title and summary. Original official title: <span lang="it">«{esc(d["oc_titolo_progetto"])}»</span></p>') if s
-            else ("" if not en else '<p class="small mu">The title is the official one, in Italian, as in the source (not translated).</p>'))
+            else ("" if not en else '<p class="small mu">The title is the official one, in Italian, as published in the source.</p>'))
     sint = d.get("oc_sintesi_progetto") or ""
     sint_h = f'<h2>{T("Descrizione ufficiale", "Official description (Italian)")}</h2><p lang="it">{esc(sint)}</p>' if sint and sint != d["oc_titolo_progetto"] else ""
     perc = f"{pag(d)/fin(d)*100:.0f}%" if fin(d) > 0 else T("dato non disponibile", "not available")
@@ -480,7 +507,7 @@ def dati_completi():
               "<th>Title (Italian)</th><th>CUP</th><th>Topic (Italian)</th><th>Status (Italian)</th><th>Funded</th><th>Already paid</th><th>Planned end</th><th>Actual end</th><th>Body (Italian)</th>")
     c = f"""<h1>{T("Dati completi", "Full data")}</h1>
 <p class="lead">{T(f"Tutti i {pl(n_perim, 'progetto', 'progetti')} considerati, con le colonne principali. Puoi filtrare e scaricare il file da aprire in un foglio di calcolo.", f"All {n_perim} projects considered, with the main columns. You can filter them and download the file to open in a spreadsheet.")}</p>
-{T("", '<p class="small mu">Titles, topics, statuses and body names are the official Italian texts from the source and are not translated. The CSV and JSON files are the same as on the Italian site: column names and values are in Italian. Meaning of the status values: <a href="../metodo/#glossario">Method and sources</a>.</p>')}
+{T("", '<p class="small mu">Titles, topics, statuses and body names are the official Italian texts from the source, shown as published. The CSV and JSON files are the same as on the Italian site: column names and values are in Italian. Meaning of the status values: <a href="../metodo/#glossario">Method and sources</a>.</p>')}
 <p class="data">{T("Dati aggiornati al", "Data updated to")} {DATA_ISO if en else DATA_DATI}</p>{avviso()}
 <p><a class="btn" href="{CSV}" download>{T("Scarica CSV (foglio di calcolo)", "Download CSV (spreadsheet)")}</a> <a class="btn" href="{JSN}" download>{T("Scarica JSON", "Download JSON")}</a></p>
 <p class="small mu">{T("Il CSV usa il punto come separatore decimale e contiene i valori in euro senza simboli. Come aprirlo: <a href='../guida/#csv'>Guida agli open data</a>.", "The CSV uses a dot as decimal separator and holds euro values without symbols. How to open it: <a href='../guida/#csv'>Tutorial</a>.")}</p>

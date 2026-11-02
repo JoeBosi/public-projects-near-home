@@ -47,7 +47,7 @@ mancano = 0
 for f in tutte:
     t = open(f, encoding="utf-8").read()
     en = os.sep + "en" + os.sep in f
-    frase = "Educational concept using official data. Not an institutional website." if en else "Concept a titolo didattico, con dati ufficiali. Non è un sito istituzionale."
+    frase = "Independent project, for educational purposes, using official data." if en else "Progetto indipendente, a titolo didattico, con dati ufficiali."
     firma = "By Prof. Giuseppe Bosi, Computer Science and Technology" if en else "A cura del Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche"
     if not (frase in t and firma in t and 'class="fonte"' in t and "OpenCoesione" in t and 'class="lingua"' in t):
         mancano += 1
