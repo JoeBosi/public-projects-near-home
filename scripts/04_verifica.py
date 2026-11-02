@@ -49,7 +49,7 @@ for f in tutte:
     en = os.sep + "en" + os.sep in f
     frase = "Independent project, for educational purposes, using official data." if en else "Progetto indipendente, a titolo didattico, con dati ufficiali."
     firma = "By Prof. Giuseppe Bosi, Computer Science and Technology" if en else "A cura del Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche"
-    if not (frase in t and firma in t and 'class="fonte"' in t and "OpenCoesione" in t and 'class="lingua"' in t):
+    if not (frase in t and firma in t and 'class="fonte"' in t and "OpenCoesione" in t and 'class="lingua ' in t):
         mancano += 1
 ok(mancano == 0, f"ogni pagina (IT e EN) ha fonte, data, frase del concept, firma e cambio lingua ({mancano} mancanti)")
 ok(not os.environ.get("OC_PROVA_FALLIMENTO"), "prova di fallimento richiesta (solo per collaudo)")
