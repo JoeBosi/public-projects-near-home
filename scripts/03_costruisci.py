@@ -138,7 +138,7 @@ a{color:var(--ac)}a:focus-visible,button:focus-visible,input:focus-visible,selec
 .w{max-width:960px;margin:0 auto;padding:0 16px}
 header.top{border-bottom:1px solid var(--l);background:var(--sf)}
 html{scroll-padding-top:110px}header.top{position:sticky;top:0;z-index:50}header.top .w.nav{display:flex;flex-wrap:wrap;gap:2px 24px;align-items:center;padding:6px 16px}header.top .fonte{background:#0b3d6e;color:#fff;font-size:.88rem;padding:5px 0}header.top .fonte a{color:#fff}header.top .conc{font-size:.8rem;opacity:.9;padding-top:1px}header.top .sh{display:none}header.top .fl{display:flex;justify-content:space-between;align-items:center;gap:12px}a.lingua.ld{display:none}a.lingua{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:none;border:1px solid #ffffff80;border-radius:6px;padding:1px 8px}
-header.top b{font-size:1.05rem}nav{display:flex;flex:1 1 auto;flex-wrap:wrap;gap:4px 18px}nav a{text-decoration:none;padding:4px 0}nav a.tut{margin-left:auto;color:#6D28D9;font-weight:700}nav a.on{border-bottom:3px solid var(--ac);font-weight:600}
+header.top b{font-size:1.05rem}nav{display:flex;flex:1 1 auto;flex-wrap:wrap;gap:4px 18px}nav a{text-decoration:none;padding:4px 0}nav a.tut{margin-left:auto;color:#6D28D9;font-weight:700}nav a.tut.on{border-bottom-color:#6D28D9}nav a.on{border-bottom:3px solid var(--ac);font-weight:600}
 h1{font-size:2rem;line-height:1.2;margin:1.2rem 0 .6rem}h2{font-size:1.4rem;margin:2.2rem 0 .6rem}h3{font-size:1.1rem;margin:1.4rem 0 .4rem}
 .lead{font-size:1.2rem;color:var(--tx)}.mu{color:var(--mu)}.small{font-size:.9rem}
 .data{display:inline-block;background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:6px 12px;margin:.3rem 0}
@@ -156,7 +156,7 @@ pre{background:var(--sf);border:1px solid var(--l);border-radius:8px;padding:12p
 .tag{display:inline-block;border:1px solid var(--l);border-radius:6px;padding:0 8px;font-size:.85rem;background:var(--sf)}
 .filtri{display:flex;flex-wrap:wrap;gap:10px;margin:.8rem 0}.filtri input,.filtri select{font:inherit;padding:8px;border:1px solid var(--l);border-radius:8px;max-width:100%}
 
-.sch-o{display:block;width:100%;height:auto;margin:.6rem 0}.sch-v{display:none;width:100%;max-width:440px;height:auto;margin:.6rem auto}@media(max-width:899px){.sch-o{display:none}.sch-v{display:block}}.build{border:2px solid var(--ac);border-radius:12px;background:#fff;padding:14px 16px;margin:1.2rem 0}.build h2{margin:0 0 .4rem;font-size:1.25rem}.build p{margin:.3rem 0 .6rem}
+.sch-o,.sch-v{overflow:visible}.sch-o{display:block;width:100%;height:auto;margin:.6rem 0}.sch-v{display:none;width:100%;max-width:440px;height:auto;margin:.6rem auto}@media(max-width:899px){.sch-o{display:none}.sch-v{display:block}}.build{border:2px solid var(--ac);border-radius:12px;background:#fff;padding:14px 16px;margin:1.2rem 0}.build h2{margin:0 0 .4rem;font-size:1.25rem}.build p{margin:.3rem 0 .6rem}
 .puoi{margin:.4rem 0 .8rem;padding-left:1.2rem}.puoi li{margin:.2rem 0}
 .hero{background:var(--sf);border:1px solid var(--l);border-radius:14px;padding:18px 18px 14px;margin:1rem 0 1.4rem}
 .hero h1{margin-top:0}.cerca{display:flex;flex-wrap:wrap;gap:8px;margin:.8rem 0}.cerca input{flex:1 1 240px;font:inherit;padding:12px;border:2px solid var(--ac);border-radius:10px}
@@ -188,6 +188,13 @@ def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
     altra = ("../" * (profondita + 1) + dir_p) if en else (rel + "en/" + dir_p)
     flag = (f'<a class="lingua" href="{altra}" hreflang="it" lang="it" title="Italiano">{FLAG_IT}<span>IT</span></a>' if en
             else f'<a class="lingua" href="{altra}" hreflang="en" lang="en" title="English">{FLAG_UK}<span>EN</span></a>')
+    img = f"{SITO}/og-opendata-arezzo.jpg"
+    ogt = esc(titolo) + " | " + T("Progetti pubblici sotto casa", "Public projects near home")
+    ogd = esc(descr or T('I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.', 'Projects funded with public cohesion funds in the Municipality of Arezzo, explained simply, with the official OpenCoesione data.'))
+    ogalt = T("Computer portatile con una dashboard dei progetti di Arezzo, una mappa della città e un modellino di ponte su un tavolo di legno", "Laptop showing a dashboard of Arezzo projects, a city map and a small bridge model on a wooden table")
+    og = (f'<meta property="og:type" content="website"><meta property="og:site_name" content="{T("Progetti pubblici sotto casa", "Public projects near home")}"><meta property="og:title" content="{ogt}"><meta property="og:description" content="{ogd}">'
+          f'<meta property="og:url" content="{SITO}/{"en/" if en else ""}{dir_p}"><meta property="og:image" content="{img}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{ogalt}"><meta property="og:locale" content="{"en_GB" if en else "it_IT"}">'
+          f'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{ogt}"><meta name="twitter:description" content="{ogd}"><meta name="twitter:image" content="{img}"><meta name="twitter:image:alt" content="{ogalt}">')
     alt_it = f'<link rel="alternate" hreflang="it" href="{SITO}/{dir_p}"><link rel="alternate" hreflang="en" href="{SITO}/en/{dir_p}">'
     nav = ([("", "Start here", "home"), ("opere/", "Projects", "opere"), ("dati/", "Full data", "dati"),
             ("metodo/", "Method and sources", "metodo"), ("guida/", "Tutorial", "guida")] if en else
@@ -196,7 +203,8 @@ def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
     n = "".join(f'<a href="{lrel}{h}" class="{"on " if k == attiva else ""}{"tut" if k == "guida" else ""}"{" aria-current=page" if k == attiva else ""}>{t}</a>' for h, t, k in nav)
     doc = f"""<!doctype html>
 <html lang="{LANG}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{esc(titolo)} | {T("Progetti pubblici sotto casa", "Public projects near home")}</title>{alt_it}
+<title>{esc(titolo)} | {T("Progetti pubblici sotto casa", "Public projects near home")}</title>{alt_it}{og}
+{og}
 <meta name="description" content="{esc(descr or T('I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.', 'Projects funded with public cohesion funds in the Municipality of Arezzo, explained simply, with the official OpenCoesione data.'))}">
 <link rel="stylesheet" href="{rel}stile.css"></head><body>
 <header class="top"><div class="fonte"><div class="w fl"><span>{T("Fonte", "Source")}: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · <span class="lg">{T("ultimo aggiornamento dei dati", "latest data update")}</span><span class="sh">{T("dati al", "data as of")}</span>: <strong>{DATA_ISO if en else DATA_DATI}</strong></span>{flag.replace('class="lingua"', 'class="lingua lm"')}</div><div class="w conc">{T("Progetto indipendente, a titolo didattico, con dati ufficiali.", "Independent project, for educational purposes, using official data.")}</div></div><div class="w nav"><b><a href="{lrel or './'}" style="text-decoration:none;color:inherit">{T("Progetti pubblici sotto casa", "Public projects near home")}</a></b><nav aria-label="Principale">{n}</nav>{flag.replace('class="lingua"', 'class="lingua ld"')}</div></header>
@@ -293,18 +301,21 @@ def riga_progetto(d):
 def schema_svg(passi):
     """Schemino 'come funziona': 4 riquadri con frecce. Due versioni (orizzontale e verticale), scelte dal CSS."""
     def box(x, y, w, h, n, t, sub, tw):
-        return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" fill="#fff" stroke="#0b5cab" stroke-width="2"/>'
+        return (f'<g class="bx"><rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" fill="#fff" stroke="#0b5cab" stroke-width="2"/>'
                 f'<circle cx="{x+22}" cy="{y+24}" r="13" fill="#0b5cab"/><text x="{x+22}" y="{y+29}" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">{n}</text>'
                 f'<text x="{x+42}" y="{y+29}" font-size="14" font-weight="700" fill="#1b2330">{esc(t)}</text>'
-                f'<text x="{x+14}" y="{y+54}" font-size="13" fill="#566074">{esc(sub)}</text>')
+                f'<text x="{x+14}" y="{y+54}" font-size="13" fill="#566074">{esc(sub)}</text></g>')
     ar = lambda x1, y1, x2, y2: f'<path d="M{x1} {y1}L{x2} {y2}" stroke="#0b5cab" stroke-width="3" marker-end="url(#fr)"/>'
     defs = '<defs><marker id="fr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#0b5cab"/></marker></defs>'
     desc = " → ".join(t for t, _ in passi)
     # verticale (telefono): viewBox 320 x 4*74+3*26
     v = defs + "".join(box(0, i*100, 320, 74, i+1, t, sub, 0) for i, (t, sub) in enumerate(passi)) + "".join(ar(160, i*100+76, 160, i*100+98) for i in range(3))
-    # orizzontale (schermi larghi): 4 riquadri da 210, spazio 30
-    h = defs + "".join(box(i*255, 0, 225, 74, i+1, t, sub, 0) for i, (t, sub) in enumerate(passi)) + "".join(ar(i*255+227, 37, i*255+252, 37) for i in range(3))
-    return (f'<svg class="sch-o" viewBox="0 0 990 76" role="img" aria-label="{esc(desc)}" xmlns="http://www.w3.org/2000/svg">{h}</svg>'
+    # schermi larghi: griglia 2x2 (i testi hanno spazio: riquadri da 450)
+    pos = [(0, 0), (480, 0), (0, 100), (480, 100)]
+    h = defs + "".join(box(x, y, 450, 74, i+1, t, sub, 0) for i, ((t, sub), (x, y)) in enumerate(zip(passi, pos)))
+    h += ar(452, 37, 478, 37) + ar(452, 137, 478, 137)
+    h += '<path d="M705 76C705 92 225 84 225 98" fill="none" stroke="#0b5cab" stroke-width="3" marker-end="url(#fr)"/>'
+    return (f'<svg class="sch-o" viewBox="0 0 930 174" role="img" aria-label="{esc(desc)}" xmlns="http://www.w3.org/2000/svg">{h}</svg>'
             f'<svg class="sch-v" viewBox="0 0 320 374" role="img" aria-label="{esc(desc)}" xmlns="http://www.w3.org/2000/svg">{v}</svg>')
 
 def home():
@@ -865,6 +876,7 @@ if __name__ == "__main__":
     shutil.rmtree(SITE, ignore_errors=True)
     os.makedirs(SITE)
     open(os.path.join(SITE, "stile.css"), "w").write(CSS)
+    shutil.copy(os.path.join(ROOT, "assets", "og-opendata-arezzo.jpg"), os.path.join(SITE, "og-opendata-arezzo.jpg"))
     for LANG in ("it", "en"):
         home(); elenco(); dati_completi()
         (metodo_en if LANG == "en" else metodo)()

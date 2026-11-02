@@ -1,5 +1,7 @@
 # public-projects-near-home
 
+![Laptop showing a dashboard of Arezzo projects, a city map and a small bridge model on a wooden table](assets/opendata-arezzo.jpg)
+
 A static website that shows, in plain language, the projects funded with Italian and European cohesion funds in the Municipality of Arezzo, built from the official [OpenCoesione](https://opencoesione.gov.it/it/api/) API.
 
 Demo: https://opendata.giuseppebosi.com (Italian, with an English interface under `/en/`).

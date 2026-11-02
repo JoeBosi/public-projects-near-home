@@ -36,6 +36,7 @@ const PAGES = [['home', ''], ['elenco', 'opere/'], ['dati', 'dati/'], ['tutorial
       let small = 0; document.querySelectorAll('main p,main li,main td,main dd,main dt,main span,main a').forEach(e => { if (vis(e) && parseFloat(getComputedStyle(e).fontSize) < 12.5) small++; });
       if (small) out.push('testo sotto 12.5px: ' + small);
       document.querySelectorAll('svg.sch-o,svg.sch-v').forEach(s => { if (!vis(s)) return; const k = s.getBoundingClientRect().width / s.viewBox.baseVal.width; if (13 * k < 11) out.push('schema: testo ' + (13 * k).toFixed(1) + 'px'); });
+      document.querySelectorAll('svg').forEach(sv => { if (!vis(sv)) return; sv.querySelectorAll('g.bx').forEach(g => { const rb = g.querySelector('rect').getBBox(); g.querySelectorAll('text').forEach(t => { const tb = t.getBBox(); if (tb.x + tb.width > rb.x + rb.width - 6 || tb.x < rb.x) out.push('schema: testo fuori riquadro: ' + t.textContent.slice(0, 30)); }); }); });
       // tabelle: dentro contenitore scorrevole
       document.querySelectorAll('table').forEach(t => { if (!inScroll(t) && t.getBoundingClientRect().right > innerWidth + 1) out.push('tabella fuori contenitore'); });
       return out;
