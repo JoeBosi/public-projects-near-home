@@ -11,11 +11,29 @@ SOGLIA = "20160101"
 num = lambda s: float((s or "0").replace(".", "").replace(",", ".")) if isinstance(s, str) else float(s or 0)
 esc = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
+LANG = "it"
+T = lambda it, en: en if LANG == "en" else it
+
 def eur(x):
+    if LANG == "en":
+        return "€" + f"{round(x):,}"
     return f"{round(x):,}".replace(",", ".") + " €"
 
 def data(s):
-    return f"{s[6:8]}/{s[4:6]}/{s[:4]}" if s and len(s) == 8 else "dato non disponibile"
+    if not (s and len(s) == 8):
+        return T("dato non disponibile", "not available")
+    return f"{s[:4]}-{s[4:6]}-{s[6:8]}" if LANG == "en" else f"{s[6:8]}/{s[4:6]}/{s[:4]}"
+
+# etichette nostre (non dati della fonte) tradotte in inglese; i valori ufficiali della fonte restano in italiano
+TEMI_EN = {"Strade e trasporti": "Roads and transport", "Ambiente": "Environment", "Cultura e turismo": "Culture and tourism",
+           "Aiuti alle imprese": "Support to businesses", "Lavoro": "Employment", "Istruzione e formazione": "Education and training",
+           "Salute e inclusione sociale": "Health and social inclusion", "Servizi digitali": "Digital services", "Energia": "Energy",
+           "Ricerca e innovazione": "Research and innovation", "Pubblica amministrazione": "Public administration"}
+NATURA_EN = {"Lavori pubblici": "Public works", "Acquisto di beni": "Purchase of goods", "Servizi": "Services",
+             "Incentivi alle imprese": "Incentives to businesses", "Contributi a enti e persone": "Grants to organisations and people"}
+def lab(it, dic):
+    """In inglese: etichetta inglese e, tra parentesi, l'italiano; se manca la traduzione resta l'italiano."""
+    return f"{dic[it]} (<span lang=\"it\">{esc(it)}</span>)" if LANG == "en" and it in dic else esc(it)
 
 VOC = set()
 MAIUSC = {"arezzo", "toscana", "italia", "valdarno", "casentino", "buriano", "europa", "fse", "fesr", "fsc", "pon", "por", "pnrr", "snai",
@@ -109,7 +127,7 @@ def enti(d):
 
 def ente_str(d):
     e = enti(d)
-    return "; ".join(frase(x) if x.isupper() else x for x in e) if e else "dato non disponibile"
+    return "; ".join(frase(x) if x.isupper() else x for x in e) if e else T("dato non disponibile", "not available")
 
 # ------------------------------------------------------------------ layout
 CSS = """
@@ -119,7 +137,7 @@ main p,main li,main dd,main h1,main h2,main h3{overflow-wrap:anywhere}
 a{color:var(--ac)}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f2a900;outline-offset:2px}
 .w{max-width:960px;margin:0 auto;padding:0 16px}
 header.top{border-bottom:1px solid var(--l);background:var(--sf)}
-header.top .w.nav{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;padding:10px 16px}header.top .fonte{background:#0b3d6e;color:#fff;font-size:.88rem;padding:5px 0}header.top .fonte a{color:#fff}
+header.top .w.nav{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;padding:10px 16px}header.top .fonte{background:#0b3d6e;color:#fff;font-size:.88rem;padding:5px 0}header.top .fonte a{color:#fff}header.top .conc{font-size:.8rem;opacity:.9;padding-top:1px}header.top .fl{display:flex;justify-content:space-between;align-items:center;gap:12px}a.lingua{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:none;border:1px solid #ffffff80;border-radius:6px;padding:1px 8px}
 header.top b{font-size:1.05rem}nav{display:flex;flex:1 1 auto;flex-wrap:wrap;gap:4px 18px}nav a{text-decoration:none;padding:4px 0}nav a.tut{margin-left:auto;color:#000;font-weight:600}nav a.on{border-bottom:3px solid var(--ac);font-weight:600}
 h1{font-size:2rem;line-height:1.2;margin:1.2rem 0 .6rem}h2{font-size:1.4rem;margin:2.2rem 0 .6rem}h3{font-size:1.1rem;margin:1.4rem 0 .4rem}
 .lead{font-size:1.2rem;color:var(--tx)}.mu{color:var(--mu)}.small{font-size:.9rem}
@@ -150,27 +168,43 @@ footer{border-top:1px solid var(--l);background:var(--sf);margin-top:3rem;paddin
 @media(max-width:600px){body{font-size:17px}h1{font-size:1.65rem}dl.sch{grid-template-columns:1fr}dl.sch dt{margin-top:6px}}
 """
 
+FLAG_IT = '<svg width="22" height="15" viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#009246"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ce2b37"/></svg>'
+FLAG_UK = ('<svg width="22" height="15" viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0 0L60 40M60 0L0 40" stroke="#fff" stroke-width="8"/>'
+           '<path d="M0 0L60 40M60 0L0 40" stroke="#c8102e" stroke-width="3"/><path d="M30 0V40M0 20H60" stroke="#fff" stroke-width="13"/><path d="M30 0V40M0 20H60" stroke="#c8102e" stroke-width="7"/></svg>')
+
+FOOT_IT = '<p>I dati provengono da <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licenza <a href="https://creativecommons.org/licenses/by/4.0/deed.it">CC BY 4.0</a>) e possono non riflettere lo stato reale: sono quelli comunicati dagli enti. Per segnalare un errore scrivi a <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Dati aggiornati al ' + "{DATA_DATI}" + '.</p>'
+FOOT_EN = '<p>The data come from <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licence <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>) and may not reflect the actual situation: they are what public bodies reported. Official project texts are kept in Italian, as in the source. To report an error write to <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Data updated to ' + "{DATA_ISO}" + '.</p>'
+
 def pagina(percorso, titolo, corpo, attiva="", descr="", profondita=0):
-    rel = "../" * profondita
-    nav = [("", "Per cominciare", "home"), ("opere/", "Opere e progetti", "opere"), ("dati/", "Dati completi", "dati"),
-           ("metodo/", "Metodo e fonti", "metodo"), ("guida/", "Tutorial", "guida")]
+    en = LANG == "en"
+    rel = "../" * (profondita + (1 if en else 0))
+    dir_p = percorso[:-len("index.html")] if percorso.endswith("index.html") else percorso
+    altra = ("../" * (profondita + 1) + dir_p) if en else (rel + "en/" + dir_p)
+    flag = (f'<a class="lingua" href="{altra}" hreflang="it" lang="it" title="Italiano">{FLAG_IT}<span>IT</span></a>' if en
+            else f'<a class="lingua" href="{altra}" hreflang="en" lang="en" title="English">{FLAG_UK}<span>EN</span></a>')
+    alt_it = f'<link rel="alternate" hreflang="it" href="{SITO}/{dir_p}"><link rel="alternate" hreflang="en" href="{SITO}/en/{dir_p}">'
+    nav = ([("", "Start here", "home"), ("opere/", "Projects", "opere"), ("dati/", "Full data", "dati"),
+            ("metodo/", "Method and sources", "metodo"), ("guida/", "Tutorial", "guida")] if en else
+           [("", "Per cominciare", "home"), ("opere/", "Opere e progetti", "opere"), ("dati/", "Dati completi", "dati"),
+            ("metodo/", "Metodo e fonti", "metodo"), ("guida/", "Tutorial", "guida")])
     n = "".join(f'<a href="{rel}{h}" class="{"on " if k == attiva else ""}{"tut" if k == "guida" else ""}"{" aria-current=page" if k == attiva else ""}>{t}</a>' for h, t, k in nav)
     doc = f"""<!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{esc(titolo)} | Progetti pubblici sotto casa</title>
-<meta name="description" content="{esc(descr or 'I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.')}">
+<html lang="{LANG}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{esc(titolo)} | {T("Progetti pubblici sotto casa", "Public projects near home")}</title>{alt_it}
+<meta name="description" content="{esc(descr or T('I progetti finanziati con fondi pubblici di coesione nel Comune di Arezzo, spiegati in modo semplice, con i dati ufficiali di OpenCoesione.', 'Projects funded with public cohesion funds in the Municipality of Arezzo, explained simply, with the official OpenCoesione data.'))}">
 <link rel="stylesheet" href="{rel}stile.css"></head><body>
-<header class="top"><div class="fonte"><div class="w">Fonte: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · ultimo aggiornamento dei dati: <strong>{DATA_DATI}</strong></div></div><div class="w nav"><b><a href="{rel}" style="text-decoration:none;color:inherit">Progetti pubblici sotto casa</a></b><nav aria-label="Principale">{n}</nav></div></header>
+<header class="top"><div class="fonte"><div class="w fl"><span>{T("Fonte", "Source")}: <a href="https://opencoesione.gov.it/">OpenCoesione</a> · {T("ultimo aggiornamento dei dati", "latest data update")}: <strong>{DATA_ISO if en else DATA_DATI}</strong></span>{flag}</div><div class="w conc">{T("Concept a titolo didattico, con dati ufficiali. Non è un sito istituzionale.", "Educational concept using official data. Not an institutional website.")}</div></div><div class="w nav"><b><a href="{rel}" style="text-decoration:none;color:inherit">{T("Progetti pubblici sotto casa", "Public projects near home")}</a></b><nav aria-label="Principale">{n}</nav></div></header>
 <main class="w">{corpo}</main>
-<footer><div class="w"><p>I dati provengono da <a href="https://opencoesione.gov.it/">OpenCoesione</a> (licenza <a href="https://creativecommons.org/licenses/by/4.0/deed.it">CC BY 4.0</a>) e possono non riflettere lo stato reale: sono quelli comunicati dagli enti. Per segnalare un errore scrivi a <a href="mailto:info@giuseppebosi.com">info@giuseppebosi.com</a>. Dati aggiornati al {DATA_DATI}.</p>
-<p>A cura del Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche — <a href="https://www.giuseppebosi.com">www.giuseppebosi.com</a></p></div></footer>
+<footer><div class="w">{FOOT_EN.replace('{DATA_ISO}', DATA_ISO) if en else FOOT_IT.replace('{DATA_DATI}', DATA_DATI)}
+<p>{T("A cura del Prof. Giuseppe Bosi, Scienze e Tecnologie Informatiche", "By Prof. Giuseppe Bosi, Computer Science and Technology")} — <a href="https://www.giuseppebosi.com">www.giuseppebosi.com</a></p></div></footer>
 </body></html>"""
-    p = os.path.join(SITE, percorso)
+    p = os.path.join(SITE, ("en/" if en else "") + percorso)
     os.makedirs(os.path.dirname(p), exist_ok=True)
     open(p, "w", encoding="utf-8").write(doc)
 
 def avviso():
-    return ('<p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l\'opera. Possono non riflettere lo stato reale.</p>')
+    return (T('<p class="avv"><strong>Limite.</strong> I dati dicono quanti soldi sono assegnati e pagati, non come è stata fatta l\'opera. Possono non riflettere lo stato reale.</p>',
+              '<p class="avv"><strong>Limit.</strong> The data tell how much money is assigned and paid, not how the work was carried out. They may not reflect the actual situation.</p>'))
 
 URLMAP = {}
 
@@ -184,6 +218,7 @@ def slug(d):
 tutti = carica()
 _m = max(d.get('data_aggiornamento') or '' for d in tutti)
 DATA_DATI = f'{_m[6:8]}/{_m[4:6]}/{_m[0:4]}'  # dalla API, non scritta a mano
+DATA_ISO = f'{_m[0:4]}-{_m[4:6]}-{_m[6:8]}'
 lista = json.load(open(os.environ.get("OC_LISTA") or os.path.join(ROOT, "dati", "lista_arezzo.json"), encoding="utf-8"))
 URLMAP.update({r["cod_locale_progetto"]: r["url"] for r in lista})
 semplici = {}
@@ -239,12 +274,12 @@ def superata(d):
 
 def riga_progetto(d):
     extra = []
-    extra.append(f'<span class="tag">{esc(tema_s(d))}</span> <span class="tag">{esc(natura(d))}</span> <span class="tag">{esc(d["oc_stato_progetto"])}</span>')
+    extra.append(f'<span class="tag">{lab(tema_s(d), TEMI_EN)}</span> <span class="tag">{lab(natura(d), NATURA_EN)}</span> <span class="tag"><span lang="it">{esc(d["oc_stato_progetto"])}</span></span>')
     pv = prevista(d)
     if pv:
-        extra.append(f"Fine prevista: {pv}" + (" (scadenza superata secondo i dati)" if superata(d) else ""))
-    return (f'<li><a href="{{R}}progetti/{slug(d)}.html">{esc(titolo_vis(d))}</a><br>'
-            f'<span class="mu">{esc(ente_str(d))}</span><br>Finanziato: <strong>{eur(fin(d))}</strong> · Già pagato: <strong>{eur(pag(d))}</strong><br>'
+        extra.append(T("Fine prevista: ", "Planned end: ") + pv + (T(" (scadenza superata secondo i dati)", " (deadline passed according to the data)") if superata(d) else ""))
+    return (f'<li><a lang="it" href="{{R}}progetti/{slug(d)}.html">{esc(titolo_vis(d))}</a><br>'
+            f'<span class="mu" lang="it">{esc(ente_str(d))}</span><br>{T("Finanziato", "Funded")}: <strong>{eur(fin(d))}</strong> · {T("Già pagato", "Already paid")}: <strong>{eur(pag(d))}</strong><br>'
             f'<span class="small">{" · ".join(extra)}</span></li>')
 
 # ------------------------------------------------------------------ home
@@ -309,68 +344,76 @@ def home():
 
 # ------------------------------------------------------------------ elenco opere
 def elenco():
-    os.makedirs(os.path.join(SITE, "opere"), exist_ok=True)
+    out = os.path.join(SITE, "en" if LANG == "en" else "", "opere"); os.makedirs(out, exist_ok=True)
     def sez(titolo, lst, ident):
         return f'<h2 id="{ident}">{titolo} ({len(lst)})</h2><ul class="lista">' + "".join(riga_progetto(d).replace("{R}", "../") for d in lst) + "</ul>"
     ope = sorted([d for d in perim if is_opera(d)], key=fin, reverse=True)
     altri_c = [d for d in corso if not is_opera(d)]
-    c = f"""<h1>Opere e progetti</h1>
-<p class="lead">Le opere e gli acquisti sono elencati per primi; poi gli altri progetti in corso o non ancora avviati. I progetti conclusi dal 2016 che non sono opere si trovano in <a href="../dati/">Dati completi</a>.</p>
-<p class="data">Dati aggiornati al {DATA_DATI}</p>{avviso()}
-<p>Vai a: <a href="#opere">Opere e acquisti</a> · <a href="#corso">In corso</a> · <a href="#nonav">Non ancora avviati</a></p>
-<div class="filtri"><label>Cerca in questa pagina <input id="qo" type="search" placeholder="per esempio scuola, ponte, museo"></label><span id="conto" class="mu" aria-live="polite"></span></div>
-<div id="vuotoo" class="vuoto" hidden>Nessun progetto contiene questa parola. Prova con una parola più corta o cancella la ricerca. Per cercare tra tutti i progetti usa <a href="../dati/">Dati completi</a>.</div>
-{sez("Opere e acquisti di beni", ope, "opere")}
-{sez("Altri progetti in corso", altri_c, "corso")}
-{sez("Progetti non ancora avviati", nonav, "nonav")}
+    c = f"""<h1>{T("Opere e progetti", "Projects")}</h1>
+<p class="lead">{T("Le opere e gli acquisti sono elencati per primi; poi gli altri progetti in corso o non ancora avviati. I progetti conclusi dal 2016 che non sono opere si trovano in <a href='../dati/'>Dati completi</a>.", "Public works and purchases come first; then the other projects that are ongoing or not yet started. Projects concluded since 2016 that are not works are in <a href='../dati/'>Full data</a>.")}</p>
+{T("", '<p class="small mu">Project titles, descriptions and the names of public bodies come from the official source and stay in Italian: they are not translated here. Status values (<span lang="it">In corso</span> = ongoing, <span lang="it">Non avviato</span> = not started) are explained in <a href="../metodo/#glossario">Method and sources</a>.</p>')}
+<p class="data">{T("Dati aggiornati al", "Data updated to")} {DATA_ISO if LANG == "en" else DATA_DATI}</p>{avviso()}
+<p>{T("Vai a", "Jump to")}: <a href="#opere">{T("Opere e acquisti", "Works and purchases")}</a> · <a href="#corso">{T("In corso", "Ongoing")}</a> · <a href="#nonav">{T("Non ancora avviati", "Not yet started")}</a></p>
+<div class="filtri"><label>{T("Cerca in questa pagina", "Search this page")} <input id="qo" type="search" placeholder="{T("per esempio scuola, ponte, museo", "Italian words, e.g. scuola, ponte, museo")}"></label><span id="conto" class="mu" aria-live="polite"></span></div>
+<div id="vuotoo" class="vuoto" hidden>{T("Nessun progetto contiene questa parola. Prova con una parola più corta o cancella la ricerca. Per cercare tra tutti i progetti usa <a href='../dati/'>Dati completi</a>.", "No project contains this word. Try a shorter word or clear the search. The titles are in Italian. To search all projects use <a href='../dati/'>Full data</a>.")}</div>
+{sez(T("Opere e acquisti di beni", "Works and purchases of goods"), ope, "opere")}
+{sez(T("Altri progetti in corso", "Other ongoing projects"), altri_c, "corso")}
+{sez(T("Progetti non ancora avviati", "Projects not yet started"), nonav, "nonav")}
 <script src="filtro.js"></script>"""
-    open(os.path.join(SITE, "opere", "filtro.js"), "w").write("""(function(){var q=document.getElementById('qo'),c=document.getElementById('conto'),v=document.getElementById('vuotoo');
+    js = """(function(){var q=document.getElementById('qo'),c=document.getElementById('conto'),v=document.getElementById('vuotoo');
 var li=[].slice.call(document.querySelectorAll('ul.lista li'));
 function f(){var x=q.value.toLowerCase().trim(),n=0;li.forEach(function(e){var ok=!x||e.textContent.toLowerCase().indexOf(x)>-1;e.hidden=!ok;if(ok)n++});
 document.querySelectorAll('h2[id]').forEach(function(h){var u=h.nextElementSibling;h.hidden=!!x&&!u.querySelector('li:not([hidden])')});
-v.hidden=n>0;c.textContent=x?(n+(n==1?' progetto trovato':' progetti trovati')):''}
-q.oninput=f;f()})();""")
-    pagina("opere/index.html", "Opere e progetti", c, "opere", profondita=1)
+v.hidden=n>0;c.textContent=x?(n+(n==1?' @1':' @2')):''}
+q.oninput=f;f()})();""".replace("@1", T("progetto trovato", "project found")).replace("@2", T("progetti trovati", "projects found"))
+    open(os.path.join(out, "filtro.js"), "w").write(js)
+    pagina("opere/index.html", T("Opere e progetti", "Projects"), c, "opere", profondita=1)
 
 # ------------------------------------------------------------------ scheda
 def scheda(d):
-    rip = [("Unione europea", d["oc_finanz_ue_netto"]), ("Stato", num(d["oc_finanz_stato_fsc_netto"]) + num(d["oc_finanz_stato_fondo_rot_netto"]) + num(d["oc_finanz_stato_altri_prov_netto"]) + num(d["oc_finanz_stato_compl_netto"]) + num(d["oc_finanz_stato_pac_netto"])),
-           ("Regione", d["oc_finanz_regione_netto"]), ("Provincia", d["oc_finanz_provincia_netto"]), ("Comune", d["oc_finanz_comune_netto"]),
-           ("Altri soggetti pubblici", d["oc_finanz_altro_pubblico_netto"]), ("Privati", d["oc_finanz_privato_netto"])]
+    en = LANG == "en"
+    rip = [(T("Unione europea", "European Union"), d["oc_finanz_ue_netto"]), (T("Stato", "Italian State"), num(d["oc_finanz_stato_fsc_netto"]) + num(d["oc_finanz_stato_fondo_rot_netto"]) + num(d["oc_finanz_stato_altri_prov_netto"]) + num(d["oc_finanz_stato_compl_netto"]) + num(d["oc_finanz_stato_pac_netto"])),
+           (T("Regione", "Region"), d["oc_finanz_regione_netto"]), (T("Provincia", "Province"), d["oc_finanz_provincia_netto"]), (T("Comune", "Municipality"), d["oc_finanz_comune_netto"]),
+           (T("Altri soggetti pubblici", "Other public bodies"), d["oc_finanz_altro_pubblico_netto"]), (T("Privati", "Private"), d["oc_finanz_privato_netto"])]
     rip = [(k, num(v)) for k, v in rip if num(v) > 0]
-    ripd = "".join(f"<li>{k}: {eur(v)}</li>" for k, v in rip) or "<li>dato non disponibile</li>"
+    ripd = "".join(f"<li>{k}: {eur(v)}</li>" for k, v in rip) or "<li>" + T("dato non disponibile", "not available") + "</li>"
     fasi = "".join(
-        f"<tr><td>{esc(f['oc_descr_fase'])}</td><td>{data(f.get('data_inizio_prevista'))}</td><td>{data(f.get('data_inizio_effettiva'))}</td><td>{data(f.get('data_fine_prevista'))}</td><td>{data(f.get('data_fine_effettiva'))}</td></tr>"
+        f"<tr><td lang=\"it\">{esc(f['oc_descr_fase'])}</td><td>{data(f.get('data_inizio_prevista'))}</td><td>{data(f.get('data_inizio_effettiva'))}</td><td>{data(f.get('data_fine_prevista'))}</td><td>{data(f.get('data_fine_effettiva'))}</td></tr>"
         for f in d.get("fasi_procedurali", []))
-    fasi_t = f'<h2>Fasi dichiarate</h2><div class="sc"><table><tr><th>Fase</th><th>Inizio previsto</th><th>Inizio effettivo</th><th>Fine prevista</th><th>Fine effettiva</th></tr>{fasi}</table></div>' if fasi else ""
+    th = T("<th>Fase</th><th>Inizio previsto</th><th>Inizio effettivo</th><th>Fine prevista</th><th>Fine effettiva</th>", "<th>Phase (Italian)</th><th>Planned start</th><th>Actual start</th><th>Planned end</th><th>Actual end</th>")
+    fasi_t = f'<h2>{T("Fasi dichiarate", "Declared phases")}</h2><div class="sc"><table><tr>{th}</tr>{fasi}</table></div>' if fasi else ""
     s = semplici.get(d["cod_locale_progetto"])
     if s and s["titolo"].strip() == (d["oc_titolo_progetto"] or "").strip():
         s = None
-    orig = (f'<p class="small mu">Titolo riscritto in italiano semplice a partire dal titolo e dalla sintesi ufficiali. Titolo originale: «{esc(d["oc_titolo_progetto"])}»</p>' if s
-            else "")
+    orig = ((f'<p class="small mu">Titolo riscritto in italiano semplice a partire dal titolo e dalla sintesi ufficiali. Titolo originale: «{esc(d["oc_titolo_progetto"])}»</p>' if not en else
+             f'<p class="small mu">The title is shown in Italian, rewritten in plain Italian from the official title and summary. Original official title: <span lang="it">«{esc(d["oc_titolo_progetto"])}»</span></p>') if s
+            else ("" if not en else '<p class="small mu">The title is the official one, in Italian, as in the source (not translated).</p>'))
     sint = d.get("oc_sintesi_progetto") or ""
-    sint_h = f"<h2>Descrizione ufficiale</h2><p>{esc(sint)}</p>" if sint and sint != d["oc_titolo_progetto"] else ""
-    perc = f"{pag(d)/fin(d)*100:.0f}%" if fin(d) > 0 else "dato non disponibile"
+    sint_h = f'<h2>{T("Descrizione ufficiale", "Official description (Italian)")}</h2><p lang="it">{esc(sint)}</p>' if sint and sint != d["oc_titolo_progetto"] else ""
+    perc = f"{pag(d)/fin(d)*100:.0f}%" if fin(d) > 0 else T("dato non disponibile", "not available")
     note = ""
     if superata(d):
-        note = f'<p class="avv">La data di fine prevista ({prevista(d)}) è precedente alla data dei dati: scadenza superata secondo i dati.</p>'
-    c = f"""<p><a href="../opere/">← Opere e progetti</a></p>
-<h1>{esc(titolo_vis(d))}</h1>{orig}
-<div class="stati"><span class="tag st">{esc(d['oc_stato_progetto'])}</span><span class="tag">{esc(tema_s(d))}</span><span class="tag">{esc(natura(d))}</span></div>
-<p class="lead">{esc(ente_str(d))}: {eur(fin(d))} finanziati, {eur(pag(d))} già pagati.</p>
-<p class="data">Dati di questo progetto aggiornati al {data(d.get('data_aggiornamento'))}</p>{note}
-<div class="cards"><div class="card fin"><div class="n">{eur(fin(d))}</div>Finanziato</div><div class="card pag"><div class="n">{eur(pag(d))}</div>Già pagato ({perc} del finanziato)</div></div>
-<h2>Che cos'è</h2>
-<dl class="sch"><dt>Argomento</dt><dd>{esc(tema_s(d))} <span class="small mu">(termine ufficiale: {esc(tema(d))})</span></dd><dt>Tipo</dt><dd>{esc(natura(d))}; {esc(frase(d['cup_descr_categoria']))}</dd>
-<dt>Chi se ne occupa</dt><dd>{esc(ente_str(d))}</dd><dt>Stato dichiarato</dt><dd>{esc(d['oc_stato_progetto'])}{' · fase: ' + esc(d['oc_descr_fase_corrente']) if d.get('oc_descr_fase_corrente') else ''}</dd>
-<dt>Inizio del progetto</dt><dd>{data(d['oc_data_inizio_progetto'])}</dd><dt>Fine prevista del progetto</dt><dd>{data(d['oc_data_fine_progetto_prevista'])}</dd><dt>Fine effettiva del progetto</dt><dd>{data(d['oc_data_fine_progetto_effettiva'])}</dd>
-<dt>CUP</dt><dd>{esc(d['cup'] or 'dato non disponibile')} <span class="small mu">(Codice Unico di Progetto)</span></dd><dt>Ciclo</dt><dd>{esc(d['oc_descr_ciclo'])}</dd></dl>
-<p class="small mu">«Dato non disponibile» significa che l'ente non ha comunicato quel dato alla fonte. Le date sopra sono quelle riferite all'intero progetto, comunicate dall'ente. La scheda ufficiale di OpenCoesione può mostrare invece le date di una singola fase, per esempio l'esecuzione dei lavori, che possono essere diverse: le fasi sono elencate più sotto.</p>
-<h2>Da dove vengono i soldi</h2><ul>{ripd}</ul>
+        note = (f'<p class="avv">La data di fine prevista ({prevista(d)}) è precedente alla data dei dati: scadenza superata secondo i dati.</p>' if not en else
+                f'<p class="avv">The planned end date ({prevista(d)}) is earlier than the date of the data: deadline passed according to the data.</p>')
+    cup = esc(d['cup'] or T('dato non disponibile', 'not available'))
+    fase_c = (' · ' + T('fase', 'phase') + ': <span lang="it">' + esc(d['oc_descr_fase_corrente']) + '</span>') if d.get('oc_descr_fase_corrente') else ''
+    c = f"""<p><a href="../opere/">← {T("Opere e progetti", "Projects")}</a></p>
+<h1 lang="it">{esc(titolo_vis(d))}</h1>{orig}
+<div class="stati"><span class="tag st" lang="it">{esc(d['oc_stato_progetto'])}</span><span class="tag">{lab(tema_s(d), TEMI_EN)}</span><span class="tag">{lab(natura(d), NATURA_EN)}</span></div>
+<p class="lead" lang="it">{esc(ente_str(d))}</p><p class="lead">{eur(fin(d))} {T("finanziati", "funded")}, {eur(pag(d))} {T("già pagati", "already paid")}.</p>
+<p class="data">{T("Dati di questo progetto aggiornati al", "Data for this project updated to")} {data(d.get('data_aggiornamento'))}</p>{note}
+<div class="cards"><div class="card fin"><div class="n">{eur(fin(d))}</div>{T("Finanziato", "Funded")}</div><div class="card pag"><div class="n">{eur(pag(d))}</div>{T("Già pagato", "Already paid")} ({perc} {T("del finanziato", "of the funded amount")})</div></div>
+<h2>{T("Che cos'è", "What it is")}</h2>
+<dl class="sch"><dt>{T("Argomento", "Topic")}</dt><dd>{lab(tema_s(d), TEMI_EN)} <span class="small mu">({T("termine ufficiale", "official term")}: <span lang="it">{esc(tema(d))}</span>)</span></dd><dt>{T("Tipo", "Type")}</dt><dd><span lang="it">{esc(natura(d))}; {esc(frase(d['cup_descr_categoria']))}</span></dd>
+<dt>{T("Chi se ne occupa", "Responsible body")}</dt><dd lang="it">{esc(ente_str(d))}</dd><dt>{T("Stato dichiarato", "Declared status")}</dt><dd><span lang="it">{esc(d['oc_stato_progetto'])}</span>{fase_c}</dd>
+<dt>{T("Inizio del progetto", "Project start")}</dt><dd>{data(d['oc_data_inizio_progetto'])}</dd><dt>{T("Fine prevista del progetto", "Planned project end")}</dt><dd>{data(d['oc_data_fine_progetto_prevista'])}</dd><dt>{T("Fine effettiva del progetto", "Actual project end")}</dt><dd>{data(d['oc_data_fine_progetto_effettiva'])}</dd>
+<dt>CUP</dt><dd>{cup} <span class="small mu">({T("Codice Unico di Progetto", "Unique Project Code")})</span></dd><dt>{T("Ciclo", "Cycle")}</dt><dd lang="it">{esc(d['oc_descr_ciclo'])}</dd></dl>
+<p class="small mu">{T("«Dato non disponibile» significa che l'ente non ha comunicato quel dato alla fonte. Le date sopra sono quelle riferite all'intero progetto, comunicate dall'ente. La scheda ufficiale di OpenCoesione può mostrare invece le date di una singola fase, per esempio l'esecuzione dei lavori, che possono essere diverse: le fasi sono elencate più sotto.", "«Not available» means the body did not report that item to the source. The dates above refer to the whole project, as reported by the body. The official OpenCoesione page may instead show the dates of a single phase, for example the execution of works, which can differ: the phases are listed below.")}</p>
+<h2>{T("Da dove vengono i soldi", "Where the money comes from")}</h2><ul>{ripd}</ul>
 {sint_h}{fasi_t}
-<h2>Fonte</h2>
-<p><a class="btn" href="{esc(d['oc_link'])}">Scheda ufficiale su OpenCoesione</a> <a class="btn" href="{esc(apiurl(d))}">Vedi da dove vengono questi dati (JSON)</a></p>
-<p class="small mu">Il link «dati» è la risposta esatta della API usata per questa pagina. Per capire come leggerla: <a href="../guida/">Guida agli open data</a>.</p>"""
+<h2>{T("Fonte", "Source")}</h2>
+<p><a class="btn" href="{esc(d['oc_link'])}">{T("Scheda ufficiale su OpenCoesione", "Official page on OpenCoesione")}</a> <a class="btn" href="{esc(apiurl(d))}">{T("Vedi da dove vengono questi dati (JSON)", "See where this data comes from (JSON)")}</a></p>
+<p class="small mu">{T("Il link «dati» è la risposta esatta della API usata per questa pagina. Per capire come leggerla: <a href='../guida/'>Guida agli open data</a>.", "The «data» link is the exact API response used for this page. To learn how to read it: <a href='../guida/'>Tutorial</a>.")}</p>"""
     pagina(f"progetti/{slug(d)}.html", titolo_vis(d), c, "opere", profondita=1)
 
 # ------------------------------------------------------------------ dati completi + CSV
@@ -383,38 +426,47 @@ def dati_completi():
                       d.get("oc_descr_fase_corrente", ""), "; ".join(enti(d)), f"{fin(d):.2f}", f"{pag(d):.2f}", d["oc_data_inizio_progetto"], d["oc_data_fine_progetto_prevista"],
                       d["oc_data_fine_progetto_effettiva"], d["oc_link"], apiurl(d)])
     os.makedirs(os.path.join(SITE, "dati"), exist_ok=True)
-    with open(os.path.join(SITE, "dati", "progetti-arezzo.csv"), "w", encoding="utf-8-sig", newline="") as f:
+    os.makedirs(os.path.join(SITE, "en", "dati"), exist_ok=True)
+    if LANG == "it":
+      with open(os.path.join(SITE, "dati", "progetti-arezzo.csv"), "w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f); w.writerow(campi); w.writerows(righe)
-    json.dump([dict(zip(campi, r)) for r in righe], open(os.path.join(SITE, "dati", "progetti-arezzo.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    if LANG == "it": json.dump([dict(zip(campi, r)) for r in righe], open(os.path.join(SITE, "dati", "progetti-arezzo.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    en = LANG == "en"
     stati = sorted({d["oc_stato_progetto"] for d in perim})
     temi = sorted({tema(d) for d in perim})
     tr = "".join(
-        f'<tr data-s="{esc(d["oc_stato_progetto"])}" data-t="{esc(tema(d))}"><td><a href="../progetti/{slug(d)}.html">{esc(titolo_vis(d))}</a></td><td>{esc(d["cup"])}</td><td>{esc(tema(d))}</td><td>{esc(d["oc_stato_progetto"])}</td>'
-        f'<td data-v="{fin(d):.0f}">{eur(fin(d))}</td><td data-v="{pag(d):.0f}">{eur(pag(d))}</td><td>{data(d["oc_data_fine_progetto_prevista"])}</td><td>{data(d["oc_data_fine_progetto_effettiva"])}</td><td>{esc(ente_str(d))}</td></tr>'
+        f'<tr data-s="{esc(d["oc_stato_progetto"])}" data-t="{esc(tema(d))}"><td lang="it"><a href="../progetti/{slug(d)}.html">{esc(titolo_vis(d))}</a></td><td>{esc(d["cup"])}</td><td lang="it">{esc(tema(d))}</td><td lang="it">{esc(d["oc_stato_progetto"])}</td>'
+        f'<td data-v="{fin(d):.0f}">{eur(fin(d))}</td><td data-v="{pag(d):.0f}">{eur(pag(d))}</td><td>{data(d["oc_data_fine_progetto_prevista"])}</td><td>{data(d["oc_data_fine_progetto_effettiva"])}</td><td lang="it">{esc(ente_str(d))}</td></tr>'
         for d in sorted(perim, key=fin, reverse=True))
-    c = f"""<h1>Dati completi</h1>
-<p class="lead">Tutti i {pl(n_perim, 'progetto', 'progetti')} considerati, con le colonne principali. Puoi filtrare e scaricare il file da aprire in un foglio di calcolo.</p>
-<p class="data">Dati aggiornati al {DATA_DATI}</p>{avviso()}
-<p><a class="btn" href="progetti-arezzo.csv" download>Scarica CSV (foglio di calcolo)</a> <a class="btn" href="progetti-arezzo.json" download>Scarica JSON</a></p>
-<p class="small mu">Il CSV usa il punto come separatore decimale e contiene i valori in euro senza simboli. Come aprirlo: <a href="../guida/#csv">Guida agli open data</a>.</p>
-<div class="filtri"><label>Cerca <input id="q" type="search" placeholder="parola nel titolo o ente"></label>
-<label>Stato <select id="fs"><option value="">Tutti</option>{''.join(f'<option>{esc(s)}</option>' for s in stati)}</select></label>
-<label>Argomento <select id="ft"><option value="">Tutti</option>{''.join(f'<option>{esc(s)}</option>' for s in temi)}</select></label>
+    CSV = "../../dati/progetti-arezzo.csv" if en else "progetti-arezzo.csv"
+    JSN = "../../dati/progetti-arezzo.json" if en else "progetti-arezzo.json"
+    heads = T("<th>Titolo</th><th>CUP</th><th>Argomento</th><th>Stato</th><th>Finanziato</th><th>Già pagato</th><th>Fine prevista</th><th>Fine effettiva</th><th>Ente</th>",
+              "<th>Title (Italian)</th><th>CUP</th><th>Topic (Italian)</th><th>Status (Italian)</th><th>Funded</th><th>Already paid</th><th>Planned end</th><th>Actual end</th><th>Body (Italian)</th>")
+    c = f"""<h1>{T("Dati completi", "Full data")}</h1>
+<p class="lead">{T(f"Tutti i {pl(n_perim, 'progetto', 'progetti')} considerati, con le colonne principali. Puoi filtrare e scaricare il file da aprire in un foglio di calcolo.", f"All {n_perim} projects considered, with the main columns. You can filter them and download the file to open in a spreadsheet.")}</p>
+{T("", '<p class="small mu">Titles, topics, statuses and body names are the official Italian texts from the source and are not translated. The CSV and JSON files are the same as on the Italian site: column names and values are in Italian. Meaning of the status values: <a href="../metodo/#glossario">Method and sources</a>.</p>')}
+<p class="data">{T("Dati aggiornati al", "Data updated to")} {DATA_ISO if en else DATA_DATI}</p>{avviso()}
+<p><a class="btn" href="{CSV}" download>{T("Scarica CSV (foglio di calcolo)", "Download CSV (spreadsheet)")}</a> <a class="btn" href="{JSN}" download>{T("Scarica JSON", "Download JSON")}</a></p>
+<p class="small mu">{T("Il CSV usa il punto come separatore decimale e contiene i valori in euro senza simboli. Come aprirlo: <a href='../guida/#csv'>Guida agli open data</a>.", "The CSV uses a dot as decimal separator and holds euro values without symbols. How to open it: <a href='../guida/#csv'>Tutorial</a>.")}</p>
+<div class="filtri"><label>{T("Cerca", "Search")} <input id="q" type="search" placeholder="{T("parola nel titolo o ente", "word in the title or body (Italian)")}"></label>
+<label>{T("Stato", "Status")} <select id="fs"><option value="">{T("Tutti", "All")}</option>{''.join(f'<option>{esc(x)}</option>' for x in stati)}</select></label>
+<label>{T("Argomento", "Topic")} <select id="ft"><option value="">{T("Tutti", "All")}</option>{''.join(f'<option>{esc(x)}</option>' for x in temi)}</select></label>
 <span id="cont" class="mu" aria-live="polite"></span></div>
-<div class="sc"><table id="tab"><thead><tr><th>Titolo</th><th>CUP</th><th>Argomento</th><th>Stato</th><th>Finanziato</th><th>Già pagato</th><th>Fine prevista</th><th>Fine effettiva</th><th>Ente</th></tr></thead><tbody>{tr}</tbody></table></div>
-<div id="vuoto" class="vuoto" hidden>Nessun progetto corrisponde ai filtri. <button type="button" id="azzera" class="btn">Azzera i filtri</button></div>
-<noscript><p>Per filtrare serve JavaScript; l'elenco è comunque completo e il CSV è scaricabile.</p></noscript>
+<div class="sc"><table id="tab"><thead><tr>{heads}</tr></thead><tbody>{tr}</tbody></table></div>
+<div id="vuoto" class="vuoto" hidden>{T("Nessun progetto corrisponde ai filtri.", "No project matches the filters.")} <button type="button" id="azzera" class="btn">{T("Azzera i filtri", "Clear filters")}</button></div>
+<noscript><p>{T("Per filtrare serve JavaScript; l'elenco è comunque completo e il CSV è scaricabile.", "Filtering needs JavaScript; the list is complete anyway and the CSV can be downloaded.")}</p></noscript>
 <script src="filtri.js"></script>"""
-    pagina("dati/index.html", "Dati completi", c, "dati", profondita=1)
-    open(os.path.join(SITE, "dati", "filtri.js"), "w").write("""(function(){var q=document.getElementById('q'),s=document.getElementById('fs'),t=document.getElementById('ft'),c=document.getElementById('cont'),v=document.getElementById('vuoto'),z=document.getElementById('azzera');
+    pagina("dati/index.html", T("Dati completi", "Full data"), c, "dati", profondita=1)
+    js = """(function(){var q=document.getElementById('q'),s=document.getElementById('fs'),t=document.getElementById('ft'),c=document.getElementById('cont'),v=document.getElementById('vuoto'),z=document.getElementById('azzera');
 var rows=[].slice.call(document.querySelectorAll('#tab tbody tr'));
 function f(){var x=q.value.toLowerCase().trim(),n=0;rows.forEach(function(r){
 var ok=(!s.value||r.dataset.s===s.value)&&(!t.value||r.dataset.t===t.value)&&(!x||r.textContent.toLowerCase().indexOf(x)>-1);r.hidden=!ok;if(ok)n++});
-c.textContent=n+(n==1?' progetto mostrato':' progetti mostrati');v.hidden=n>0}
+c.textContent=n+(n==1?' @1':' @2');v.hidden=n>0}
 q.oninput=s.onchange=t.onchange=f;
 z.onclick=function(){q.value='';s.value='';t.value='';f();q.focus()};
 try{var p=new URLSearchParams(location.search);if(p.get('q'))q.value=p.get('q')}catch(e){}
-f()})();""")
+f()})();""".replace("@1", T("progetto mostrato", "project shown")).replace("@2", T("progetti mostrati", "projects shown"))
+    open(os.path.join(SITE, "en" if en else "", "dati", "filtri.js"), "w").write(js)
 
 # ------------------------------------------------------------------ metodo
 def metodo():
